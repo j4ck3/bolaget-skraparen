@@ -1,17 +1,12 @@
 import { useState } from 'react';
-import Image from 'next/image';
 import { Option } from '../interfaces/Option';
 import BackToTopButton from './BackToTopButton';
 import { type NextPage } from 'next';
-import { StaticImport } from 'next/dist/shared/lib/get-img-props';
 import { Store } from '../interfaces/Store';
-
-
-
 
 interface Props {
     selected: Option;
-    searchedImgSrc: string | StaticImport;
+    searchedImgSrc: string;
     stores: Store[]
   }
 
@@ -33,87 +28,22 @@ const StoresGrid: NextPage<Props> = ({ selected, searchedImgSrc, stores}) => {
           city: "Villagetown",
           amount: 800
         },
-        {
-          address: "101 Pine Ave",
-          city: "Hamletville",
-          amount: 1200
-        },
-        {
-          address: "123 Main St",
-          city: "Cityville",
-          amount: 1000
-        },
-        {
-          address: "456 Elm St",
-          city: "Townburg",
-          amount: 1500
-        },
-        {
-          address: "789 Oak Rd",
-          city: "Villagetown",
-          amount: 800
-        },
-        {
-          address: "101 Pine Ave",
-          city: "Hamletville",
-          amount: 1200
-        },
-        {
-          address: "123 Main St",
-          city: "Cityville",
-          amount: 1000
-        },
-        {
-          address: "456 Elm St",
-          city: "Townburg",
-          amount: 1500
-        },
-        {
-          address: "789 Oak Rd",
-          city: "Villagetown",
-          amount: 800
-        },
-        {
-          address: "101 Pine Ave",
-          city: "Hamletville",
-          amount: 1200
-        },
-        {
-          address: "456 Elm St",
-          city: "Townburg",
-          amount: 1500
-        },
-        {
-          address: "789 Oak Rd",
-          city: "Villagetown",
-          amount: 800
-        },
-        {
-          address: "101 Pine Ave",
-          city: "Hamletville",
-          amount: 1200
-        }
       ];
-
-
       const [showAll, setShowAll] = useState(false);
       const itemsToShow = showAll ? storeArray.length : 4;
 
-      
   return (
     <>
-        <div className='grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
+        <div className='grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-16 mx-4'>
           {stores.slice(0, itemsToShow).map((store, index) => (
-            <div className='border-2 border-gray-700 rounded-2xl p-7 flex justify-center' key={index}>
-              <div>
-                <Image alt={selected.title} src={searchedImgSrc} width={30} height={30} className='me-10' title={selected.title} />
-              </div>
-              <div>
-                <h3 className='md:pe-14 text-base'>{store.address}</h3>
-                <p className='text-gray-700'>{store.city}</p>
-                <p className='mt-3 text-lg text-white font-bold'>{store.amount} st</p>
-              </div>
-            </div>
+            <div className='border border-gray-200 rounded-xl p-4 flex justify-between' key={index}>
+                <img alt={selected.title} src={searchedImgSrc} width={30} height={30} title={selected.title} />
+                  <div className='w-4/6'>
+                    <h3 className='text-base font-medium'>{store.address}</h3>
+                    <p className='text-gray-700'>{store.city}</p>
+                  </div>
+                  <p className='text-lg font-regular text-green-600'>{store.amount} st</p>
+            </div>  
           ))}
             {stores.length > 4 && (
                 !showAll && (

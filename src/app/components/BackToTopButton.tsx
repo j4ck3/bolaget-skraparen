@@ -29,7 +29,7 @@ function BackToTopButton() {
   return (
     <button
       type='button'
-      className={`w-16 h-16 fixed bottom-0 right-0 mr-5 mb-5 lg:mr-20 lg:mb-20 btn-theme rounded-full text-2xl transition-opacity duration-300 hover:opacity-100 ${
+      className={`w-16 h-16 fixed bottom-0 right-0 mr-5 mb-5 lg:mr-20 lg:mb-20 btn-theme bg-green-600 rounded-full text-2xl transition-opacity duration-300 hover:opacity-100 ${
         isVisible ? 'opacity-50' : 'opacity-0'
       }`}
       onClick={scrollToTop}

@@ -1,3 +1,39 @@
-.btn-theme {
-    background-color: rgb(7, 70, 52);;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+
+.amount {
+    color: rgb(7, 70, 52);
+    font-weight: bold;
 }
+
+.btn-search {
+    background-color: rgb(7, 70, 52);   
+    position: relative;
+    display: inline-block;
+    padding: 1.25rem 20px;
+    margin-bottom: 1.25rem;
+    border: none;
+    color: white;
+    transition: .3s ease;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    z-index: 0;
+    cursor: pointer;
+  }
+  
+  .btn-search::before {
+    cursor: pointer;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background-color: rgb(4, 43, 32);
+    transition: 0.3s cubic-bezier(.45,.05,.55,.95);
+    z-index: -1;
+  }
+  
+  .btn-search:hover::before {
+    width: 100%;
+    cursor: pointer;
+  }
