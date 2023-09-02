@@ -49,7 +49,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   };
 
   return (
-<div className='fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm flex items-center justify-center'>
+<div className='fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm flex items-center justify-center mx-3'>
   <div className='bg-slate-900 w-96 p-6 rounded-lg shadow-lg'>
     <div className='flex justify-between flex-row mb-4'>
       <h2 className='text-md font-medium'>Mina drycker</h2>

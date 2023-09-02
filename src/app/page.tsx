@@ -1,5 +1,4 @@
 'use client'
-import Head from 'next/head'
 import { useState } from 'react';
 import DropDown from "./components/DropDown";
 import PulseStoresLoading from './components/PulseStoresLoading';
@@ -13,10 +12,15 @@ import ManageOptions from './components/MangeOptions';
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [area, setArea] = useState<string>('')
-  const [searchedImgSrc, setSearchedImgSrc] = useState<string>('')
   const [stores, setStores] = useState<Store[]>([])
   const [canSubmit, setCanSubmit] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('')
   const [showManageOptions, setShowManageOptoins] = useState(false)
+  const [searchedOption, setSearchedOption] = useState<Option>({
+    imgSrc: '',
+    title: '',
+    url: '',
+  })
   const [selected, setSelected] = useState<Option>({
     imgSrc: '',
     title: 'Välj en dryck *',
@@ -25,13 +29,20 @@ const Home = () => {
 
   async function fetchAndLoadStores() {
     try {
+      setErrorMessage('')
       setIsLoading(true)
       const response = await getStores(selected.url, area);
-      setSearchedImgSrc(selected.imgSrc)
+      setSearchedOption(selected)
       setStores(response.storesList)
+      
+      if (response.storesList.length < 1) 
+        setErrorMessage(`Inga butiker i ${area} hade ${selected.title}.`);
+      
+
     } catch (error) {
       console.error('Error fetching stores:', error);
       setStores([]);
+      setErrorMessage('Det gick inte att hämta informationen')
     }
     finally {
       setIsLoading(false)
@@ -62,7 +73,14 @@ const Home = () => {
           </button>
       </div>
       <div className='container mx-auto my-32'>
-        {isLoading ? ( <PulseStoresLoading /> ) : (<StoresGrid selected={selected} searchedImgSrc={searchedImgSrc} stores={stores}/> )}
+        {isLoading ? ( <PulseStoresLoading /> ) : (<StoresGrid selected={selected} searchedImgSrc={searchedOption.imgSrc} stores={stores}/> )}
+        <div className="flex justify-center items-center">
+          {errorMessage && (
+            <p className="text-red-300 bg-red-900 border-red-400 px-12 py-2 border rounded-md">
+              {errorMessage}
+            </p>
+          )}
+        </div>
       </div>
       <ManageOptions onClose={handleOnClose} visible={showManageOptions} />
     </>

@@ -30,7 +30,7 @@ const StoresGrid: NextPage<Props> = ({ selected, searchedImgSrc, stores}) => {
         },
       ];
       const [showAll, setShowAll] = useState(false);
-      const itemsToShow = showAll ? storeArray.length : 4;
+      const itemsToShow = showAll ? stores.length : 4;
 
   return (
     <>
