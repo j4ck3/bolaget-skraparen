@@ -89,7 +89,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         className='text-red-800 hover:text-red-900 text-sm font-medium'
         onClick={() => handleDeleteOption(index)}
       >
-        Delete
+        Radera
       </button>
     </li>
     ))}
