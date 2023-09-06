@@ -94,7 +94,7 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
               <ul className='p-2'>
                 {suggestions.map((suggestion, index) => (
                   <li 
-                  className='my-1 ml-2 text-gray-400 font-semibold text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                  className='my-1 ml-2 font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
                   key={index}
                   onClick={() => handleSuggestionClick(suggestion)}
                   >

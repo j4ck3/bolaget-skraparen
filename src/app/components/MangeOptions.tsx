@@ -39,17 +39,25 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   };
   
   const handleAddOption = () => {
-    if (newOption.title && newOption.url && newOption.imgSrc) {
-      const updatedOptions = [...options, newOption];
-      setOptions(updatedOptions);
-      localStorage.setItem('options', JSON.stringify(updatedOptions));
-      setNewOption({ imgSrc: '', title: '', url: ''});
+    if (newOption.title && newOption.url) {
+      const doesOptionExist = options.some((option) => option.title === newOption.title);
+  
+      if (!doesOptionExist) {
+        const updatedOptions = [...options, newOption];
+        setOptions(updatedOptions);
+        localStorage.setItem('options', JSON.stringify(updatedOptions));
+        setNewOption({ imgSrc: '', title: '', url: '' });
+      } else {
+        alert('Titeln måste vara unik.');
+      }
+    }else {
+      alert('Fyll i Titel och Url');
     }
   };
   
   if (!visible) return null
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm flex items-center justify-center mx-3'>
+    <div className='fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm flex items-center justify-center mx-3 z-20'>
   <div className='bg-slate-900 w-96 p-6 rounded-lg shadow-lg'>
     <div className='flex justify-between flex-row mb-4'>
       <h2 className='text-md font-medium'>Mina drycker</h2>
@@ -100,20 +108,26 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
     ))}
   </ul>
 ) : (
-  <p className='text-center font-regular text-sm text-slate-400 mb-6'>Inga tillagda drycker än</p>
+  <p className='text-center font-regular text-sm text-slate-400 mb-6'>Inga tillagda drycker</p>
 )}
   <div className='flex justify-between flex-row mb-2'>
   <h2 className='text-sm font-regular'>Lägg till</h2>
     <div>
-      <a className='text-sm hover:underline p-1 px-4 bg-slate-500 rounded-md' href='https://www.systembolaget.se/' target='_blank'>Systembolaget<i className="text-sm fa-solid fa-up-right-from-square ms-2"></i></a>
-
+      <a 
+        className='text-sm hover:underline p-1 px-4 bg-slate-500 rounded-md' 
+        href='https://www.systembolaget.se/' 
+        target='_blank'
+        >
+        Systembolaget
+        <i className="text-sm fa-solid fa-up-right-from-square ms-2"></i>
+      </a>
     </div>
   </div>
     <div>
       <input
         type='text'
         name='url'
-        placeholder='Länk-adress *'
+        placeholder='Url *'
         value={newOption.url}
         onChange={handleInputChange}
         className='w-full mt-1 px-4 py-2 bg-gray-800 rounded-lg focus:outline-none'
