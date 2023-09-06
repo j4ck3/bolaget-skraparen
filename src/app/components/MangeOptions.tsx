@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Option } from '../interfaces/Option';
 import { NextPage } from 'next';
-
+import Image from 'next/image';
 interface Props {
   visible: boolean
   onClose: () => void
@@ -75,26 +75,40 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         </svg>
       </button>
     </div>
-    <ul>
-  {options.map((option, index) => (
-    <li key={index} className='flex items-center justify-between mb-4'>
-      <div className='flex items-center space-x-4'>
-        <div className='w-12'>
-          <img className='w-auto h-16' src={option.imgSrc} alt={option.title} />
+  {options.length > 0 ? (
+  <ul>
+    {options.map((option, index) => (
+      <li key={index} className='flex items-center justify-between mb-4'>
+        <div className='flex items-center space-x-4'>
+          <div className='w-12'>
+          {option.imgSrc && option.imgSrc.startsWith('/') ? (
+            <div className='w-12'>
+              <Image className='w-auto h-16' width={16} height={16} src={option.imgSrc} alt={option.title} />
+            </div>
+          ) : (<span className='text-xs'>img</span>)}
+          </div>
+          <p className='text-lg'>{option.title}</p>
         </div>
-        <p className='text-lg'>{option.title}</p>
-      </div>
-      <button
-        type='button'
-        className='text-red-800 hover:text-red-900 text-sm font-medium'
-        onClick={() => handleDeleteOption(index)}
-      >
-        Radera
-      </button>
-    </li>
+        <button
+          type='button'
+          className='text-red-800 hover:text-red-900 text-sm font-medium'
+          onClick={() => handleDeleteOption(index)}
+        >
+          Radera
+        </button>
+      </li>
     ))}
   </ul>
-    <h2 className='text-md font-medium'>Lägg till</h2>
+) : (
+  <p className='text-center font-regular text-sm text-slate-400 mb-6'>Inga tillagda drycker än</p>
+)}
+  <div className='flex justify-between flex-row mb-2'>
+  <h2 className='text-sm font-regular'>Lägg till</h2>
+    <div>
+      <a className='text-sm hover:underline p-1 px-4 bg-slate-500 rounded-md' href='https://www.systembolaget.se/' target='_blank'>Systembolaget<i className="text-sm fa-solid fa-up-right-from-square ms-2"></i></a>
+
+    </div>
+  </div>
     <div>
       <input
         type='text'

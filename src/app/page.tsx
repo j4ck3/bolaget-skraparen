@@ -15,7 +15,7 @@ const Home = () => {
   const [stores, setStores] = useState<Store[]>([])
   const [canSubmit, setCanSubmit] = useState(false);
   const [errorMessage, setErrorMessage] = useState('')
-  const [showManageOptions, setShowManageOptoins] = useState(false)
+  const [showManageOptions, setShowManageOptions] = useState(false)
   const [searchedOption, setSearchedOption] = useState<Option>({
     imgSrc: '',
     title: '',
@@ -31,13 +31,17 @@ const Home = () => {
     try {
       setErrorMessage('')
       setIsLoading(true)
-      const response = await getStores(selected.url, area);
-      setSearchedOption(selected)
-      setStores(response.storesList)
-      
-      if (response.storesList.length < 1) 
-        setErrorMessage(`Inga butiker i ${area} hade ${selected.title}.`);
-      
+      if(selected.url !== '') {
+        const response = await getStores(selected.url, area);
+        setSearchedOption(selected)
+        setStores(response.storesList)
+
+        if (response.storesList.length < 1) 
+          setErrorMessage(`Inga butiker i ${area} hade ${selected.title}.`);
+      }
+      else {
+        setErrorMessage('Välj en dryck')
+      }
 
     } catch (error) {
       console.error('Error fetching stores:', error);
@@ -49,30 +53,40 @@ const Home = () => {
     }
   }
 
+
   const handleStateChange = (newValue: string) => {
     setArea(newValue);
     setCanSubmit(newValue !== '');
   };
 
-  const handleOnClose = () => setShowManageOptoins(false)
-
+  const handleOnClose = () => setShowManageOptions(false)
 
   return (
     <>
-      <h1 className='text-2xl mt-14 text-center'>Välj en alkoholhaltig dryck och sedan  &#x1F37B;</h1>
-      <h2 className='text-sm mt-3 text-center text-gray-500 mx-4'>...och sedan få information i vilka butiker i din stad den finns.</h2>
-      <div className='flex flex-col md:flex-row justify-center items-center space-x-4 h-80 mt-20'>
-        <div className='relative'>
-          <button className='text-xs underline font-medium text-gray-600' onClick={(e) => setShowManageOptoins(true)}>Lägg till fler drycker<i className="fa-solid fa-circle-plus ms-2"></i></button>
-          <DropDown selected={selected} setSelected={setSelected} />
-        </div>
-         <label htmlFor='area' className='sr-only'>area</label>
-         <AreaInput onInputChange={handleStateChange} />
-          <button onClick={fetchAndLoadStores} type='button' className={`btn-search bg-green-800 ${canSubmit ? "cursor-pointer": "cursor-not-allowed"}`} disabled={!canSubmit} title='SÖK'>Hämta från bolaget
+      <h1 className='text-md mt-14 text-center mx-4 lg:text-2xl'>Välj en alkoholhaltig dryck och sedan  &#x1F37B;</h1>
+      <h2 className='text-xs md:text-md mt-3 text-center text-gray-500 mx-4'>...och sedan få information i vilka butiker i din stad den finns.</h2>
+      <div className='w-auto md:container mx-auto'>
+        <div className='flex flex-col md:flex-row justify-center items-center mt-20 mx-5 space-y-4 md:space-y-0 md:space-x-4'>
+          <div className='w-full relative'>
+            <button
+              className="text-xs add-drink-btn rounded-full px-8 py-[2px] hover:text-yellow-400 transition duration-300 ease-in-out"
+              onClick={(e) => setShowManageOptions(true)}
+            >
+              <span className="font-medium text-sm ">
+                Lägg till <i className="ms-2 fa-solid fa-wine-glass"></i>
+              </span>
+            </button>
+                
+            <DropDown selected={selected} setSelected={setSelected} />
+          </div>
+          <label htmlFor='area' className='sr-only'>stad</label>
+          <AreaInput onInputChange={handleStateChange} />
+          <button onClick={fetchAndLoadStores} type='button' className={`btn-search w-full ${canSubmit ? "cursor-pointer text-yellow-400": "cursor-not-allowed text-gray-400"}`} disabled={!canSubmit} title='SÖK'>
+            Hämta från bolaget
             {isLoading ? (<i className="fa-solid fa-circle-notch animate-spin mx-2"></i>) : ( '' )}
           </button>
-      </div>
-      <div className='container mx-auto my-32'>
+        </div>
+        <div className='my-32'>
         {isLoading ? ( <PulseStoresLoading /> ) : (<StoresGrid selected={selected} searchedImgSrc={searchedOption.imgSrc} stores={stores}/> )}
         <div className="flex justify-center items-center">
           {errorMessage && (
@@ -83,6 +97,7 @@ const Home = () => {
         </div>
       </div>
       <ManageOptions onClose={handleOnClose} visible={showManageOptions} />
+      </div>
     </>
   );
 };
