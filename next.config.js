@@ -16,6 +16,7 @@ const nextConfig = {
             pathname: '/productimages/**/*',
           },
         ],
+        
       },
 }
 

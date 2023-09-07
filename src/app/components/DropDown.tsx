@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { type NextPage } from 'next';
 import { Option } from '../interfaces/Option'
 import Image from 'next/image';
-import ab from '../../content/ab.png';
-import ey from '../../content/ey.png';
-import tc from '../../content/tc.png';
+import ab from '../content/ab.png';
+import ey from '../content/ey.png';
+import tc from '../content/tc.png';
 
 interface Props {
   selected: Option;
