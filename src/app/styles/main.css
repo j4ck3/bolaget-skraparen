@@ -24,3 +24,7 @@
     right: 7px;
     top: -28px;
   }
+
+  .option-input:focus {
+    outline: 2px solid rgb(7, 70, 52)!important;
+  }

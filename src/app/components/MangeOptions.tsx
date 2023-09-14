@@ -40,9 +40,9 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   
   const handleAddOption = () => {
     if (newOption.title && newOption.url) {
-      const doesOptionExist = options.some((option) => option.title === newOption.title);
+      const optionExists = options.some((option) => option.title === newOption.title);
   
-      if (!doesOptionExist) {
+      if (!optionExists) {
         const updatedOptions = [...options, newOption];
         setOptions(updatedOptions);
         localStorage.setItem('options', JSON.stringify(updatedOptions));
@@ -63,13 +63,13 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
       <h2 className='text-md font-medium'>Mina drycker</h2>
       <button
         type='button'
-        className='self-end text-gray-600 hover:text-gray-800'
+        className='self-end text-white px-6 py-1 bg-slate-500 rounded-full hover:text-gray-800'
         onClick={onClose}
       >
-        <span className='sr-only'>Close</span>
+        <span>Stäng</span>
         <svg
           xmlns='http://www.w3.org/2000/svg'
-          className='h-6 w-6'
+          className='h-6 w-6 ms-2 inline'
           fill='none'
           viewBox='0 0 24 24'
           stroke='currentColor'
@@ -89,17 +89,23 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
       <li key={index} className='flex items-center justify-between mb-4'>
         <div className='flex items-center space-x-4'>
           <div className='w-12'>
-          {option.imgSrc && option.imgSrc.startsWith('/') ? (
-            <div className='w-12'>
-              <Image className='w-auto h-16' width={16} height={16} src={option.imgSrc} alt={option.title} />
-            </div>
-          ) : (<span className='text-xs'>img</span>)}
+            {option.imgSrc && (option.imgSrc.startsWith('http') || option.imgSrc.startsWith('/')) ?(
+              <Image 
+              alt='dricka' 
+              src={option.imgSrc}
+              width={20}
+              height={20}
+              className='inline w-auto h-12'
+              />
+            )
+            : (<span className='text-2xl'><i className="fa-solid fa-martini-glass"></i></span>)
+            }
           </div>
           <p className='text-lg'>{option.title}</p>
         </div>
         <button
           type='button'
-          className='text-red-800 hover:text-red-900 text-sm font-medium'
+          className='text-yellow-500 text-sm font-medium'
           onClick={() => handleDeleteOption(index)}
         >
           Radera
@@ -114,6 +120,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   <h2 className='text-sm font-regular'>Lägg till</h2>
     <div>
       <a 
+      rel="noopener"
         className='text-sm hover:underline p-1 px-4 bg-slate-500 rounded-md' 
         href='https://www.systembolaget.se/' 
         target='_blank'
@@ -130,7 +137,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Url *'
         value={newOption.url}
         onChange={handleInputChange}
-        className='w-full mt-1 px-4 py-2 bg-gray-800 rounded-lg focus:outline-none'
+        className='w-full mt-1 px-4 py-2 bg-gray-800 rounded-lg option-input'
         required
       />
       <input
@@ -139,7 +146,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Titel *'
         value={newOption.title}
         onChange={handleInputChange}
-        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg focus:outline-none'
+        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg option-input'
         required
       />
       <input
@@ -148,15 +155,17 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Bild Url'
         value={newOption.imgSrc}
         onChange={handleInputChange}
-        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg focus:outline-none'
+        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg option-input'
       />
-      <button
-        type='button'
-        className='mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700'
-        onClick={handleAddOption}
-      >
-        Spara
-      </button>
+      <div className='w-100'>
+        <button
+          type='button'
+          className='mt-4 w-full bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-700'
+          onClick={handleAddOption}
+        >
+          Spara
+        </button>
+      </div>
     </div>
   </div>
 </div>

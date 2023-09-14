@@ -80,17 +80,21 @@ const Dropdown: NextPage<Props> = ({ selected, setSelected }) => {
           isActive ? 'border-gray-200 absolute md:static' : 'border-gray-400 '
           }`}
           >
-          <div className='p-4 font-semibold hover:bg-slate-600 rounded-md'>
-            {selected.imgSrc !== '' && (selected.imgSrc.startsWith('http') || selected.imgSrc.startsWith('/')) && (
-              <Image 
-                alt='dricka' 
-                src={selected.imgSrc}
-                width={22}
-                height={22}
-                className='inline mr-4 w-auto'
-              />
-            )}
-            <p className='font-regular inline text-gray-300'>{selected.title}</p>
+          <div className='p-4 font-regular hover:bg-slate-600 rounded-md'>
+            <div className='grid grid-cols-6 items-center'>
+              <div className='w-12 flex justify-center col-span-1'>
+                  {selected.imgSrc !== '' && (selected.imgSrc.startsWith('http') || selected.imgSrc.startsWith('/')) && (
+                  <Image 
+                    alt='dricka' 
+                    src={selected.imgSrc}
+                    width={20}
+                    height={20}
+                    className='inline w-auto h-12'
+                  />
+                )}
+              </div>
+              <p className='text-white col-span-5'>{selected.title}</p>
+            </div>
           </div>
 
           {isActive && (
@@ -104,16 +108,20 @@ const Dropdown: NextPage<Props> = ({ selected, setSelected }) => {
                   }}
                   className='font-semibold p-4 hover:bg-slate-600 rounded-md'
                   >
-                  {option.imgSrc !== '' && (option.imgSrc.startsWith('http') || option.imgSrc.startsWith('/')) && (
-                    <Image 
-                      alt='dricka' 
-                      src={option.imgSrc}
-                      width={22}
-                      height={22}
-                      className='inline mr-4 w-auto'
-                    />
-                  )}
-                  <p className='text-white inline'>{option.title}</p>
+                  <div className='grid grid-cols-6 items-center'>
+                    <div className='w-12 flex justify-center col-span-1'>
+                        {option.imgSrc !== '' && (option.imgSrc.startsWith('http') || option.imgSrc.startsWith('/')) && (
+                        <Image 
+                          alt='dricka' 
+                          src={option.imgSrc}
+                          width={20}
+                          height={20}
+                          className='inline w-auto h-12'
+                        />
+                      )}
+                    </div>
+                    <p className='text-white col-span-5'>{option.title}</p>
+                  </div>
                 </div>
               ))}
             </div>

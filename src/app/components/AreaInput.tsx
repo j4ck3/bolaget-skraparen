@@ -12,6 +12,8 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
       const suggestionRef = useRef<HTMLDivElement | null>(null);
       const inputRef = useRef<HTMLInputElement | null>(null);
       const [isActive, setIsActive] = useState(false);
+
+      const [savedAreas, setSavedAreas] = useState<string[]>([])
       
       const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -23,10 +25,26 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
         .filter((city) =>
           city.toLowerCase().includes(value.toLowerCase().trim())
         )
-        .filter((suggestion) => suggestion.toLowerCase() !== value.toLowerCase().trim()); // Exclude exact matches
+        .filter((suggestion) => suggestion.toLowerCase() !== value.toLowerCase().trim());
   
       setSuggestions(filteredSuggestions);
       };
+
+      const handlePinClick = (suggestion: string) => {
+        const savedAreaExists = savedAreas.some((area) => area === suggestion);
+
+        if(!savedAreaExists) {
+          const updatedAreas = [...savedAreas, suggestion];
+          localStorage.setItem('areas', JSON.stringify(updatedAreas));
+          setSavedAreas(updatedAreas)
+        }
+      }
+
+      const handleDeleteArea = (indexToDelete: number) => {
+        const updatedAreas = savedAreas.filter((_, index) => index !== indexToDelete);
+        setSavedAreas(updatedAreas);
+        localStorage.setItem('areas', JSON.stringify(updatedAreas));
+      }
 
       const handleSuggestionClick = (suggestion: string) => {
         setInputValue(suggestion);
@@ -44,6 +62,12 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
       }
 
       useEffect(() => {
+        try {
+          const storedOptions = JSON.parse(localStorage.getItem('areas') || '[]');
+          setSavedAreas(storedOptions);
+        } catch (error) {
+          console.error('Error parsing stored options:', error);
+        }
         const handleClickOutside = (event: MouseEvent) => {
           if (
             inputRef.current &&
@@ -89,20 +113,58 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
               </button>
             )}
 
-          {isActive && suggestions.length > 0 &&(
-            <div ref={suggestionRef} className='max-h-64 mt-4 w-full overflow-y-auto absolute rounded-lg border border-gray-200 bg-black z-10'>
-              <ul className='p-2'>
-                {suggestions.map((suggestion, index) => (
-                  <li 
-                  className='my-1 ml-2 font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
-                  key={index}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  >
+          {isActive && suggestions.length > 0 && (
+          <div ref={suggestionRef} className='max-h-64 mt-4 w-full overflow-y-auto absolute rounded-lg border border-gray-200 bg-black z-10'>
+            {savedAreas.length > 0 && (
+              <div>
+                <h4 className='text-center text-xs text-slate-500 my-2'>Sparade Städer<i className='ms-2 fa-solid fa-location-dot'></i></h4>
+                <ul className='p-2'>
+                  {savedAreas.map((item, index) => (
+                    <li
+                      className='font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                      key={index}
+                      onClick={() => handleSuggestionClick(item)}
+                    >
+                      <div className='flex flex-row justify-between items-center'>
+                        {item}
+                        <button
+                          title='ta bort'
+                          onClick={() => handleDeleteArea(index)}
+                          className='w-[35px] bg-slate-700 hover:bg-red-900 rounded-md'
+                        >
+                          <i className='fa-solid fa-minus'></i>
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <hr className='my-3' />
+              </div>
+            )}
+
+            <ul className='p-2'>
+              {suggestions.map((suggestion, index) => (
+                <li 
+                className='font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                key={index}
+                onClick={() => handleSuggestionClick(suggestion)}
+                >
+                  <div className='flex flex-row justify-between items-center'>
                     {suggestion}
-                  </li>
-                ))}
-              </ul> 
-            </div>
+                    <button
+                      title='pinna'
+                      onClick={() => handlePinClick(suggestion)}
+                      className='w-[35px] bg-slate-700 hover:bg-green-900 rounded-md'
+                    >
+                        <i className='fa-solid text-xs fa-thumbtack'></i>
+                      </button>
+
+                  </div>
+                </li>
+                
+              ))}
+            </ul> 
+          </div>
           )}
         </div>
       );
