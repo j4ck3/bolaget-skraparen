@@ -8,33 +8,45 @@ import Image from 'next/image';
 interface Props {
   searchedOption: Option;
   stores: Store[];
-  area: string;
+  searchedArea: string;
 }
 
-const StoresGrid: NextPage<Props> = ({ searchedOption, stores, area }) => {
+const StoresGrid: NextPage<Props> = ({
+  searchedOption,
+  stores,
+  searchedArea,
+}) => {
   const [showAll, setShowAll] = useState(false);
   const itemsToShow = showAll ? stores.length : 4;
 
   return (
     <>
       {stores.length > 0 && (
-        <div className="mt-16 mx-4 border border-gray-200 rounded-xl container mx-auto w-2/3 lg:w-1/3">
-          <div className="">
+        <div className="border border-gray-200 rounded-xl container mx-auto w-full lg:w-1/3">
+          <div className="flex justify-center items-center m-3">
             <Image
               alt={searchedOption.title}
               src={searchedOption.imgSrc}
               width={25}
               height={25}
               title={searchedOption.title}
-              className="w-auto mx-auto mt-3 max-h-[48px]"
+              className="w-auto me-2 max-h-[48px]"
             />
+            <h3>
+              {searchedOption.title}
+              <span className="mx-2 text-gray-600">|</span>
+              {searchedArea}
+              <span className="mx-2 text-gray-600">|</span>
+              <i className="fa-solid fa-circle amount text-sm me-2"></i>
+              {stores.length} butiker
+            </h3>
           </div>
-          <h3 className="text-center my-5">
-            I <strong>{area}</strong> finns
-            <strong> {searchedOption.title}</strong> i {stores.length} butiker:
-          </h3>
+
           {stores.slice(0, itemsToShow).map((store, index) => (
-            <div className="rounded-xl p-2 flex justify-between" key={index}>
+            <div
+              className="p-2 flex justify-between border-t-[1px] border-gray-700"
+              key={index}
+            >
               <div className="w-4/6">
                 <h3 className="text-base font-medium">{store.address}</h3>
               </div>

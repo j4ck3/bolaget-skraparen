@@ -12,6 +12,7 @@ import ManageOptions from './components/MangeOptions';
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [area, setArea] = useState<string>('');
+  const [searchedArea, setSearchedArea] = useState<string>('');
   const [stores, setStores] = useState<Store[]>([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,6 +32,7 @@ const Home = () => {
     try {
       setErrorMessage('');
       setIsLoading(true);
+      setSearchedArea(area);
       if (selected.url !== '') {
         const response = await getStores(selected.url, area);
         setSearchedOption(selected);
@@ -106,7 +108,7 @@ const Home = () => {
           {isLoading ? (
             <PulseStoresLoading />
           ) : (
-            <StoresGrid searchedOption={searchedOption} stores={stores} area={area} />
+            <StoresGrid searchedOption={searchedOption} stores={stores} searchedArea={searchedArea} />
           )}
           <div className="flex justify-center items-center">
             {errorMessage && (
