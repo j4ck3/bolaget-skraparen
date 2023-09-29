@@ -7,21 +7,24 @@ import Image from 'next/image';
 
 interface Props {
   searchedOption: Option;
-  stores: Store[];
   searchedArea: string;
+  result: {
+    price: string,
+    stores: Store[]
+  }
 }
 
 const StoresGrid: NextPage<Props> = ({
   searchedOption,
-  stores,
   searchedArea,
+  result
 }) => {
   const [showAll, setShowAll] = useState(false);
-  const itemsToShow = showAll ? stores.length : 4;
+  const itemsToShow = showAll ? result.stores.length : 4;
 
   return (
     <>
-      {stores.length > 0 && (
+      {result.stores.length > 0 && (
         <div className="border border-gray-200 rounded-xl container mx-auto w-full lg:w-1/3">
           <div className="flex justify-center items-center m-3">
             <Image
@@ -37,12 +40,13 @@ const StoresGrid: NextPage<Props> = ({
               <span className="mx-2 text-gray-600">|</span>
               {searchedArea}
               <span className="mx-2 text-gray-600">|</span>
-              <i className="fa-solid fa-circle amount text-sm me-2"></i>
-              {stores.length} butiker
+              {result.stores.length} butiker
+              <span className="mx-2 text-gray-600">|</span>
+              {result.price}:-
             </h3>
           </div>
 
-          {stores.slice(0, itemsToShow).map((store, index) => (
+          {result.stores.slice(0, itemsToShow).map((store, index) => (
             <div
               className="p-2 flex justify-between border-t-[1px] border-gray-700"
               key={index}
@@ -53,7 +57,7 @@ const StoresGrid: NextPage<Props> = ({
               <p className="text-lg font-medium amount">{store.amount}</p>
             </div>
           ))}
-          {stores.length > 4 && !showAll && (
+          {result.stores.length > 4 && !showAll && (
             <div className="col-span-full flex justify-center">
               <button
                 type="button"
