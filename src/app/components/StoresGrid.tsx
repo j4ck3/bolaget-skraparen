@@ -5,85 +5,68 @@ import { type NextPage } from 'next';
 import { Store } from '../interfaces/Store';
 import Image from 'next/image';
 
-
 interface Props {
-    selected: Option;
-    searchedImgSrc: string;
-    stores: Store[]
-  }
+  searchedOption: Option;
+  stores: Store[];
+  searchedArea: string;
+}
 
-const StoresGrid: NextPage<Props> = ({ selected, searchedImgSrc, stores}) => {
-
-    const storeArray = [
-        {
-          address: "123 Main St",
-          city: "Cityville",
-          amount: 1000
-        },
-        {
-          address: "456 Elm St",
-          city: "Townburg",
-          amount: 1500
-        },
-        {
-          address: "789 Oak Rd",
-          city: "Villagetown",
-          amount: 800
-        },
-        {
-          address: "123 Main St",
-          city: "Cityville",
-          amount: 1000
-        },
-        {
-          address: "456 Elm St",
-          city: "Townburg",
-          amount: 1500
-        },
-        {
-          address: "789 Oak Rd",
-          city: "Villagetown",
-          amount: 800
-        },
-      ];
-      const [showAll, setShowAll] = useState(false);
-      const itemsToShow = showAll ? stores.length : 4;
+const StoresGrid: NextPage<Props> = ({
+  searchedOption,
+  stores,
+  searchedArea,
+}) => {
+  const [showAll, setShowAll] = useState(false);
+  const itemsToShow = showAll ? stores.length : 4;
 
   return (
     <>
-        <div className='grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-16 mx-4'>
+      {stores.length > 0 && (
+        <div className="border border-gray-200 rounded-xl container mx-auto w-full lg:w-1/3">
+          <div className="flex justify-center items-center m-3">
+            <Image
+              alt={searchedOption.title}
+              src={searchedOption.imgSrc}
+              width={25}
+              height={25}
+              title={searchedOption.title}
+              className="w-auto me-2 max-h-[48px]"
+            />
+            <h3>
+              {searchedOption.title}
+              <span className="mx-2 text-gray-600">|</span>
+              {searchedArea}
+              <span className="mx-2 text-gray-600">|</span>
+              <i className="fa-solid fa-circle amount text-sm me-2"></i>
+              {stores.length} butiker
+            </h3>
+          </div>
+
           {stores.slice(0, itemsToShow).map((store, index) => (
-            <div className='border border-gray-200 rounded-xl p-4 flex justify-between' key={index}>
-              <div className=''>
-                <Image
-                    alt={selected.title}
-                    src={searchedImgSrc}
-                    width={22} height={22}
-                    title={selected.title}
-                    className='w-auto me-3 max-h-[48px]'
-                  />
+            <div
+              className="p-2 flex justify-between border-t-[1px] border-gray-700"
+              key={index}
+            >
+              <div className="w-4/6">
+                <h3 className="text-base font-medium">{store.address}</h3>
               </div>
-              <div className='w-4/6'>
-                <h3 className='text-base font-medium'>{store.address}</h3>
-                <p className='text-gray-700'>{store.city}</p>
-              </div>
-              <p className='text-lg font-medium amount'>{store.amount} st</p>
-            </div>  
+              <p className="text-lg font-medium amount">{store.amount}</p>
+            </div>
           ))}
-            {stores.length > 4 && (
-                !showAll && (
-                <div className='col-span-full flex justify-center'>
-                    <button
-                      type='button'
-                      className='text-white font-bold tracking-wide btn-search rounded-xl mt-4 py-2 px-4'
-                      onClick={() => setShowAll(true)}>
-                      Visa alla
-                    </button>
-                </div>
-                )
-            )}
+          {stores.length > 4 && !showAll && (
+            <div className="col-span-full flex justify-center">
+              <button
+                type="button"
+                className="text-white font-bold tracking-wide btn-search rounded-xl m-5 py-2"
+                onClick={() => setShowAll(true)}
+              >
+                Visa alla
+              </button>
+            </div>
+          )}
           <BackToTopButton />
         </div>
+      )}
     </>
   );
 };
