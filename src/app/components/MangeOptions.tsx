@@ -58,7 +58,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   if (!visible) return null
   return (
     <div className='fixed inset-0 bg-black bg-opacity-10 backdrop-blur-sm flex items-center justify-center mx-3 z-20'>
-  <div className='bg-slate-900 w-96 p-6 rounded-lg shadow-lg'>
+  <div className='bg-theme w-96 p-6 rounded-lg shadow-lg'>
     <div className='flex justify-between flex-row mb-4'>
       <h2 className='text-md font-medium'>Mina drycker</h2>
       <button
@@ -120,8 +120,8 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
   <h2 className='text-sm font-regular'>Lägg till</h2>
     <div>
       <a 
-      rel="noopener"
-        className='text-sm hover:underline p-1 px-4 bg-slate-500 rounded-md' 
+        rel="noopener"
+        className='text-sm hover:text-gray-800 p-1 px-4 bg-slate-500 rounded-md' 
         href='https://www.systembolaget.se/' 
         target='_blank'
         >
@@ -137,7 +137,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Url *'
         value={newOption.url}
         onChange={handleInputChange}
-        className='w-full mt-1 px-4 py-2 bg-gray-800 rounded-lg option-input'
+        className='w-full mt-1 px-4 py-2 bg-white text-black rounded-full option-input'
         required
       />
       <input
@@ -146,7 +146,7 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Titel *'
         value={newOption.title}
         onChange={handleInputChange}
-        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg option-input'
+        className='w-full mt-4 px-4 py-2 bg-white text-black rounded-full option-input'
         required
       />
       <input
@@ -155,12 +155,12 @@ const ManageOptions: NextPage<Props> = ({visible, onClose}) => {
         placeholder='Bild Url'
         value={newOption.imgSrc}
         onChange={handleInputChange}
-        className='w-full mt-4 px-4 py-2 bg-gray-800 rounded-lg option-input'
+        className='w-full mt-4 px-4 py-2 bg-white text-black rounded-full option-input'
       />
       <div className='w-100'>
         <button
           type='button'
-          className='mt-4 w-full bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-700'
+          className='mt-4 w-full px-4 py-2 rounded-md bg-yellow-700 text-white'
           onClick={handleAddOption}
         >
           Spara

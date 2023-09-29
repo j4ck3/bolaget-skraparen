@@ -46,7 +46,7 @@ const Home = () => {
     } catch (error) {
       console.error('Error fetching stores:', error);
       setStores([]);
-      setErrorMessage('Det gick inte att hämta informationen')
+      setErrorMessage('Det gick inte att hämta informationen.')
     }
     finally {
       setIsLoading(false)
@@ -65,7 +65,7 @@ const Home = () => {
     <>
       <h1 className='text-md mt-14 text-center mx-4 lg:text-2xl'>Välj en alkoholhaltig dryck och sedan  &#x1F37B;</h1>
       <h2 className='text-xs md:text-md mt-3 text-center text-gray-500 mx-4'>...och sedan få information i vilka butiker i din stad den finns.</h2>
-      <div className='w-auto md:container mx-auto'>
+      <div className='w-auto container mx-auto lg:w-2/3'>
         <div className='flex flex-col md:flex-row justify-center items-center mt-20 mx-5 space-y-4 md:space-y-0 md:space-x-4 md:h-56'>
           <div className='w-full relative'>
             <button
@@ -90,8 +90,8 @@ const Home = () => {
           {isLoading ? ( <PulseStoresLoading /> ) : (<StoresGrid selected={selected} searchedImgSrc={searchedOption.imgSrc} stores={stores}/> )}
           <div className='flex justify-center items-center'>
           {errorMessage && (
-            <p className='text-red-300 bg-red-900 border-red-400 px-12 py-2 border rounded-md'>
-              {errorMessage}
+            <p className='text-red-300 bg-red-900 border-red-400 px-12 py-2 m-3 border rounded-md'>
+              {errorMessage}<a className='underline ms-2 hover:text-white' href='mailto:contact@hjacke.com'>Support</a>
             </p>
           )}
         </div>

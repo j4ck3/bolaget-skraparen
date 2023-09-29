@@ -4,6 +4,14 @@
     color: rgb(7, 70, 52);
 }
 
+.bg-theme-sec {
+  background-color: #ffd400!important;
+}
+
+.bg-theme {
+  background-color: rgb(7, 70, 52);
+}
+
 .btn-search {
     background-color: rgb(7, 70, 52) !important;   
     position: relative;

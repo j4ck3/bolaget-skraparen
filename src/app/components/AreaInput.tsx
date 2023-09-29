@@ -114,10 +114,10 @@ const AreaInput: NextPage<Props> = ({ onInputChange}) => {
             )}
 
           {isActive && suggestions.length > 0 && (
-          <div ref={suggestionRef} className='max-h-64 mt-4 w-full overflow-y-auto absolute rounded-lg border border-gray-200 bg-black z-10'>
+          <div ref={suggestionRef} className={`transition-opacity ${isActive ? 'opacity-100' : 'opacity-0'} max-h-64 mt-4 w-full overflow-y-auto absolute rounded-lg border border-gray-200 bg-black z-10`}>
             {savedAreas.length > 0 && (
               <div>
-                <h4 className='text-center text-xs text-slate-500 my-2'>Sparade Städer<i className='ms-2 fa-solid fa-location-dot'></i></h4>
+                <h4 className='text-center text-xs text-slate-500 my-2'>Pinnade Städer<i className='ms-2 fa-solid fa-location-dot'></i></h4>
                 <ul className='p-2'>
                   {savedAreas.map((item, index) => (
                     <li
