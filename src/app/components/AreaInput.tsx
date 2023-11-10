@@ -92,26 +92,26 @@ const AreaInput: NextPage<Props> = ({ onInputChange }) => {
   }, [isActive]);
 
   return (
-    <div className="relative w-full">
+    <div className='relative w-full'>
       <input
         ref={inputRef}
-        type="text"
+        type='text'
         value={inputValue}
         required
         onFocus={handleInputChange}
         onChange={handleInputChange}
-        placeholder="Stad / Ort *"
-        className="bg-black w-full rounded-lg border border-gray-400 p-4 focus:outline-none hover:border-gray-200 focus:border-gray-200"
+        placeholder='Stad / Ort *'
+        className='bg-black w-full rounded-lg border border-gray-400 p-4 focus:outline-none hover:border-gray-200 focus:border-gray-200'
       />
       {inputValue && (
         <button
-          type="button"
-          className="absolute right-3 top-0 mt-2 mr-2 p-2 bg-transparent rounded-full text-gray-400 hover:text-gray-900 focus:outline-none"
+          type='button'
+          className='absolute right-3 top-0 mt-2 mr-2 p-2 bg-transparent rounded-full text-gray-400 hover:text-gray-900 focus:outline-none'
           onClick={handleClear}
-          title="Rensa"
+          title='Rensa'
         >
-          <i className="fa-solid fa-x"></i>
-          <div className="sr-only">Rensa</div>
+          <i className='fa-solid fa-x'></i>
+          <div className='sr-only'>Rensa</div>
         </button>
       )}
 
@@ -119,51 +119,57 @@ const AreaInput: NextPage<Props> = ({ onInputChange }) => {
           <div ref={suggestionRef} className='max-h-64 mt-4 w-full overflow-y-auto absolute rounded-lg border border-gray-200 bg-black z-10'>
             {savedAreas.length > 0 && (
               <div>
-                <h4 className='text-center text-xs text-slate-500 my-2'>Sparade Städer<i className='ms-2 fa-solid fa-location-dot'></i></h4>
-                <ul className='p-2'>
-                  {savedAreas.map((item, index) => (
-                    <li
-                      className='font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                <h4 className='text-center text-xs text-slate-500 my-2'>Pinnade ständer</h4>
+                <div className='px-2'>
+                  {savedAreas.map((suggestion, index) => (
+                    <div
+                      className='flex flex-row justify-between items-center gap-2 mb-2 group'
                       key={index}
-                      onClick={() => handleSuggestionClick(item)}
                     >
-                      <div className='flex flex-row justify-between items-center'>
-                        {item}
-                        <button
-                          title='ta bort'
-                          onClick={() => handleDeleteArea(index)}
-                          className='w-[35px] bg-slate-700 hover:bg-red-900 rounded-md'
-                        >
-                          <i className='fa-solid fa-minus'></i>
-                        </button>
+                      <div
+                        className='font-regular flex-grow text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        {suggestion}
                       </div>
-                    </li>
+                      <button
+                        title='ta bort'
+                        type='button'
+                        onClick={() => handleDeleteArea(index)}
+                        className='w-[35px] bg-slate-700 rounded-md p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
+                      >
+                        <i className='fa-solid fa-minus'></i>
+                      </button>
+                    </div>
                   ))}
-                </ul>
+                </div>
                 <hr className='my-3' />
               </div>
             )}
 
-          <ul className="p-2">
+          <div className='p-2'>
             {suggestions.map((suggestion, index) => (
-              <li
-                className="font-regular text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white"
+              <div
+                className='flex flex-row justify-between items-center gap-2 mb-2 group'
                 key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
               >
-                <div className="flex flex-row justify-between items-center">
+                <div
+                  className='font-regular flex-grow text-md cursor-pointer border-gray-900 rounded-md p-1 hover:bg-slate-600 hover:text-white'
+                  onClick={() => handleSuggestionClick(suggestion)}
+                >
                   {suggestion}
-                  <button
-                    title="pinna"
-                    onClick={() => handlePinClick(suggestion)}
-                    className="w-[35px] bg-slate-700 hover:bg-green-900 rounded-md"
-                  >
-                    <i className="fa-solid text-xs fa-thumbtack"></i>
-                  </button>
                 </div>
-              </li>
+                <button
+                  title='pinna'
+                  type='button'
+                  onClick={() => handlePinClick(suggestion)}
+                  className='w-[35px] bg-slate-700 rounded-md p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
+                >
+                  <i className='fa-solid text-xs fa-thumbtack'></i>
+                </button>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

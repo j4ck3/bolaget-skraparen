@@ -5,43 +5,43 @@ import { type NextPage } from 'next';
 const PulseStoresLoading: NextPage = () => {
   return (
     <>
-        <div className='grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'>
-            <div className='animate-pulse border-2 border-gray-700 rounded-2xl p-7 flex'>
-              <div className='w-16 h-16 bg-slate-300 p-7 rounded-full me-5'>
-              </div>
-              <div>
-                <h3 className='h-4  bg-slate-300 rounded w-32 mb-4 '></h3>
-                <p className='h-2 bg-slate-300 rounded'></p>
-                <p className='h-2 mt-3 bg-slate-300 rounded'></p>
-              </div>
+        <div className="border border-gray-200 rounded-xl container mx-auto w-full lg:w-1/3">
+          <div className="flex justify-center items-center m-3 animate-pulse">
+            <div className='w-12 h-12 bg-slate-300 p-7 rounded-full me-4'></div>
+            <h3 className='flex items-center'>
+              <div className='h-5 bg-slate-300 rounded w-20 inline-block'></div>
+              <span className="mx-2 text-gray-600">|</span>
+              <div className='h-5 bg-slate-300 rounded w-20 inline-block'></div>
+              <span className="mx-2 text-gray-600">|</span>
+              <div className='h-5 bg-slate-300 rounded w-20 inline-block'></div>
+              <span className="mx-2 text-gray-600">|</span>
+              <div className='h-5 bg-slate-300 rounded w-20 inline-block'></div>
+            </h3>
+          </div>
+          <div className="p-2 flex justify-between border-t-[1px] border-gray-700 animate-pulse">
+            <div className="w-4/6">
+              <div className='h-5 bg-slate-300 rounded w-24 inline-block'></div>
             </div>
-            <div className='animate-pulse border-2 border-gray-700 rounded-2xl p-7 flex'>
-              <div className='w-16 h-16 bg-slate-300 p-7 rounded-full me-5'>
-              </div>
-              <div>
-                <h3 className='h-4  bg-slate-300 rounded w-32 mb-4 '></h3>
-                <p className='h-2 bg-slate-300 rounded'></p>
-                <p className='h-2 mt-3 bg-slate-300 rounded'></p>
-              </div>
+            <div className='h-5 bg-slate-300 rounded w-16 inline-block'></div>
+          </div>
+          <div className="p-2 flex justify-between border-t-[1px] border-gray-700 animate-pulse">
+            <div className="w-4/6">
+              <div className='h-5 bg-slate-300 rounded w-24 inline-block'></div>
             </div>
-            <div className='animate-pulse border-2 border-gray-700 rounded-2xl p-7 flex'>
-              <div className='w-16 h-16 bg-slate-300 p-7 rounded-full me-5'>
-              </div>
-              <div>
-                <h3 className='h-4  bg-slate-300 rounded w-32 mb-4 '></h3>
-                <p className='h-2 bg-slate-300 rounded'></p>
-                <p className='h-2 mt-3 bg-slate-300 rounded'></p>
-              </div>
+            <div className='h-5 bg-slate-300 rounded w-16 inline-block'></div>
+          </div>
+          <div className="p-2 flex justify-between border-t-[1px] border-gray-700 animate-pulse">
+            <div className="w-4/6">
+              <div className='h-5 bg-slate-300 rounded w-24 inline-block'></div>
             </div>
-            <div className='animate-pulse border-2 border-gray-700 rounded-2xl p-7 flex'>
-              <div className='w-16 h-16 bg-slate-300 p-7 rounded-full me-5'>
-              </div>
-              <div>
-                <h3 className='h-4  bg-slate-300 rounded w-32 mb-4 '></h3>
-                <p className='h-2 bg-slate-300 rounded'></p>
-                <p className='h-2 mt-3 bg-slate-300 rounded'></p>
-              </div>
+            <div className='h-5 bg-slate-300 rounded w-16 inline-block'></div>
+          </div>
+          <div className="p-2 flex justify-between border-t-[1px] border-gray-700 animate-pulse">
+            <div className="w-4/6">
+              <div className='h-5 bg-slate-300 rounded w-24 inline-block'></div>
             </div>
+            <div className='h-5 bg-slate-300 rounded w-16 inline-block'></div>
+          </div>
         </div>
     </>
   );

@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState } from 'react';
 import { getStores } from './services/getStoresInfo';
 import { Store } from './interfaces/Store';
@@ -8,6 +9,8 @@ import PulseStoresLoading from './components/PulseStoresLoading';
 import StoresGrid from './components/StoresGrid';
 import AreaInput from './components/AreaInput';
 import ManageOptions from './components/MangeOptions';
+import logo from './content/bolaget.png';
+
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -71,8 +74,14 @@ const Home = () => {
 
   return (
     <>
-      <h1 className='text-md mt-14 text-center mx-4 lg:text-2xl'>Välj en alkoholhaltig dryck och sedan  &#x1F37B;</h1>
-      <h2 className='text-xs md:text-md mt-3 text-center text-gray-500 mx-4'>...och sedan få information i vilka butiker i din stad den finns.</h2>
+      <Image 
+        alt='bolaget' 
+        src={logo}
+        width={120}
+        className='m-auto mt-14'
+      />
+      <h1 className='text-md mt-8 text-center mx-4 lg:text-2xl'>Välj en alkoholhaltig dryck och sedan  &#x1F37B;</h1>
+      <h2 className='text-sm md:text-md mt-3 text-center text-gray-500 mx-4'>...få detaljerad information om tillgänglighet i butiker nära dig.</h2>
       <div className='w-auto md:container mx-auto'>
         <div className='flex flex-col md:flex-row justify-center items-center mt-20 mx-5 space-y-4 md:space-y-0 md:space-x-4 md:h-56'>
           <div className='w-full relative'>
