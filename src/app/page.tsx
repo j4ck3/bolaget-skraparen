@@ -48,7 +48,8 @@ const Home = () => {
         setSearchedOption(selected);
 
         if (response.data.stores < 1)
-          setErrorMessage(`Inga butiker i ${area} hade ${selected.title}.`);
+          //setErrorMessage(`Inga butiker i ${area} hade ${selected.title}.`);
+          setErrorMessage(`Det gick inte att hämta informationen`);
       } else {
         setErrorMessage('Välj en dryck');
       }
@@ -119,7 +120,7 @@ const Home = () => {
             )}
           </button>
         </div>
-        <div className='my-32'>
+        <div className='my-32 mx-4'>
           {isLoading ? ( <PulseStoresLoading /> ) : (<StoresGrid searchedOption={searchedOption} result={result} searchedArea={searchedArea}/> )}
           <div className='flex justify-center items-center'>
           {errorMessage && (

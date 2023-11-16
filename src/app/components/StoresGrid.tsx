@@ -38,11 +38,11 @@ const StoresGrid: NextPage<Props> = ({
             <h3>
               {searchedOption.title}
               <span className="mx-2 text-gray-600">|</span>
-              {searchedArea}
+              {result.price}:-
               <span className="mx-2 text-gray-600">|</span>
               {result.stores.length} butiker
               <span className="mx-2 text-gray-600">|</span>
-              {result.price}:-
+              {searchedArea}
             </h3>
           </div>
 
@@ -52,7 +52,8 @@ const StoresGrid: NextPage<Props> = ({
               key={index}
             >
               <div className="w-4/6">
-                <h3 className="text-base font-medium">{store.address}</h3>
+                <h3 className="text-base font-medium">{store.city}</h3>
+                <h3 className="text-sm font-medium text-gray-600">{store.address}</h3>
               </div>
               <p className="text-lg font-medium amount">{store.amount}</p>
             </div>
