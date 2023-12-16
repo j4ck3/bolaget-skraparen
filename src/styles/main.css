@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap');
+
+.amount {
+	color: rgb(0, 149, 50);
+}
+
+.bg-theme-sec {
+	background-color: #ffd400 !important;
+}
+
+.bg-theme {
+	background-color: rgb(7, 70, 52);
+}
+
+.btn-search {
+	background-color: rgb(7, 70, 52) !important;
+	position: relative;
+	display: inline-block;
+	padding: 1rem;
+	border: none;
+	color: white;
+	transition: 0.3s ease;
+	overflow: hidden;
+	border-radius: 0.5rem;
+	z-index: 0;
+	cursor: pointer;
+}
+
+.add-drink-btn {
+	background-color: rgb(7, 70, 52);
+	position: absolute;
+	right: 7px;
+	top: -28px;
+}
+
+.option-input:focus {
+	outline: 2px solid rgb(7, 70, 52) !important;
+}
