@@ -1,0 +1,19 @@
+FROM oven/bun:latest
+
+# Install dependencies and Chromium browser
+RUN apt-get update && \
+    apt-get install -y chromium gnupg unzip && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json bun.lockb* ./
+RUN bun install
+
+# Expose port
+EXPOSE 5000
+
+# Default command (can be overridden in docker-compose)
+CMD ["bun", "--watch", "src/app.ts"]
+

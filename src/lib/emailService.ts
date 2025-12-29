@@ -1,8 +1,13 @@
-const nodemailer = require('nodemailer')
+import nodemailer from 'nodemailer'
+
 const GMAIL_EMAIL = process.env.GMAIL_EMAIL
 const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD
 
-const sendEmail = async (product) => {
+interface Product {
+	url: string
+}
+
+const sendEmail = async (product: Product): Promise<void> => {
 	const parsedUrl = new URL(product.url)
 	const pathnameParts = parsedUrl.pathname.split('/')
 	const desiredValue = pathnameParts[pathnameParts.length - 1].replaceAll(
@@ -26,7 +31,7 @@ const sendEmail = async (product) => {
 
 		const info = await transporter.sendMail({
 			from: `StockScraper <${GMAIL_EMAIL}>`,
-			to: GMAIL_EMAIL,
+			to: GMAIL_EMAIL!,
 			subject: `${desiredValue} FINNS NU TILLGÄNGLIG`,
 			html: html,
 		})
@@ -37,4 +42,4 @@ const sendEmail = async (product) => {
 	}
 }
 
-module.exports = sendEmail
+export default sendEmail

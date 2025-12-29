@@ -1,4 +1,4 @@
-FROM node:slim
+FROM oven/bun:latest
 
 # Install dependencies and Chromium browser
 RUN apt-get update && \
@@ -18,9 +18,7 @@ WORKDIR /app
 
 COPY package.json /app/package.json
 
-COPY package-lock.json /app
-
-RUN npm install
+RUN bun install
 
 COPY . /app
 
@@ -33,4 +31,4 @@ RUN chmod -R 777 /app
 
 USER app
 
-CMD [ "npm", "run", "start" ]
+CMD [ "bun", "run", "start" ]

@@ -1,10 +1,11 @@
-const fs = require('fs')
-const puppeteer = require('puppeteer-extra')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
-const { executablePath } = require('puppeteer')
+import { writeFile } from 'fs/promises'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import { executablePath } from 'puppeteer'
 
-const getAllCities = async (url) => {
+puppeteer.use(StealthPlugin())
+
+const getAllCities = async (url: string): Promise<void> => {
 	console.log('running the scraping')
 	const browser = await puppeteer.launch({
 		headless: false,
@@ -12,7 +13,7 @@ const getAllCities = async (url) => {
 	})
 	const page = await browser.newPage()
 
-	//set age consent cookie
+	// set age consent cookie
 	const decodedValue = '{"state":{"verified":true},"version":0}'
 	await page.setCookie({
 		name: 'systembolaget.age',
@@ -24,17 +25,17 @@ const getAllCities = async (url) => {
 		waitUntil: 'domcontentloaded',
 	})
 
-	//find the show stored button an click it!
+	// find the show stores button and click it!
 	const button = await page.$('.css-103vv0f')
 
 	if (button) {
 		await button.click()
-		// Listen for the dialog event and dissmiss it.
+		// Listen for the dialog event and dismiss it.
 		page.on('dialog', async (dialog) => {
 			await dialog.dismiss()
 		})
 
-		//Select hela sverige on the <select> element
+		// Select hela sverige on the <select> element
 		const selectElement = await page.$('.css-dz8wl')
 		if (selectElement) {
 			const valueToSelect = 'sweden'
@@ -44,43 +45,42 @@ const getAllCities = async (url) => {
 		}
 	} else {
 		console.log('Button not found')
+		await browser.close()
 		return
 	}
 
-	//Wait for stores then map store content
-
+	// Wait for stores then map store content
 	await page.waitForSelector('.css-4od5c4')
 
 	const cities = await page.evaluate(async () => {
 		const stores = Array.from(document.querySelectorAll('.css-4od5c4'))
 
 		const data = stores.map((item) => {
-			let city = item
-				.querySelector('.css-1tkalz1 .css-1cwtvfm')
-				.textContent.trim()
+			const city =
+				item
+					.querySelector('.css-1tkalz1 .css-1cwtvfm')
+					?.textContent?.trim() || ''
 
 			return city
 		})
 		return data
 	})
 
-	browser.close()
+	await browser.close()
 
-	function writeArrayToJsonFile(array, filename) {
+	const writeArrayToJsonFile = async (array: string[], filename: string) => {
 		const jsonArray = JSON.stringify(array, null, 2)
 
-		fs.writeFile(filename, jsonArray, (err) => {
-			if (err) {
-				console.error('Error writing to file:', err)
-			} else {
-				console.log('JSON array has been written to the file:', filename)
-			}
-		})
+		try {
+			await writeFile(filename, jsonArray)
+			console.log('JSON array has been written to the file:', filename)
+		} catch (err) {
+			console.error('Error writing to file:', err)
+		}
 	}
 
 	const filename = 'output.json'
-
-	writeArrayToJsonFile(cities, filename)
+	await writeArrayToJsonFile(cities, filename)
 }
 
-module.exports = getAllCities
+export default getAllCities

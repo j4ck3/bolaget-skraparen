@@ -1,9 +1,22 @@
-const puppeteer = require('puppeteer-extra')
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
-const { executablePath } = require('puppeteer')
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import { executablePath } from 'puppeteer'
 
-const getProductsFromSearch = async (url, productName) => {
+puppeteer.use(StealthPlugin())
+
+interface Product {
+	name: string
+	brandAndQuantity: string
+	price: string
+	imageUrl: string
+}
+
+interface ProductResult {
+	products?: Product[]
+	message?: string
+}
+
+const getProductsFromSearch = async (url: string, productName?: string): Promise<ProductResult | undefined> => {
 	const browser = await puppeteer.launch({
 		headless: false,
 		executablePath: executablePath(),
@@ -15,10 +28,11 @@ const getProductsFromSearch = async (url, productName) => {
 	})
 
 	try {
-		await page.waitForTimeout(3000)
+		await new Promise(resolve => setTimeout(resolve, 3000))
 	} catch (e) {
 		console.error('waitForSelector product-list or product-item: not found')
-		browser.close()
+		await browser.close()
+		return undefined
 	}
 	// get the price and stocks of all the stores
 	try {
@@ -27,30 +41,30 @@ const getProductsFromSearch = async (url, productName) => {
 				document.querySelectorAll('.product-item')
 			)
 
-			const processData = (productItem) => {
+			const processData = (productItem: Element) => {
 				const priceElement = productItem.querySelector(
 					'.product-item-price p'
 				)
 				const priceText = priceElement
-					? priceElement.textContent.trim()
+					? priceElement.textContent?.trim() || 'Price not found'
 					: 'Price not found'
 
 				const nameElement = productItem.querySelector('.label')
 				const productName = nameElement
-					? nameElement.textContent.trim()
+					? nameElement.textContent?.trim() || 'Name not found'
 					: 'Name not found'
 
 				const brandAndQuantityElement =
 					productItem.querySelector('.brand-and-weight')
 				const brandAndQuantity = brandAndQuantityElement
-					? brandAndQuantityElement.textContent.trim()
+					? brandAndQuantityElement.textContent?.trim() || 'Brand and weight not found'
 					: 'Brand and weight not found'
 
 				const imageElement = productItem.querySelector(
 					'.product-grid-item-image-col img:nth-child(2)'
 				)
 				const imageUrl = imageElement
-					? imageElement.getAttribute('src')
+					? imageElement.getAttribute('src') || 'Image URL not found'
 					: 'Image URL not found'
 
 				return {
@@ -69,23 +83,17 @@ const getProductsFromSearch = async (url, productName) => {
 
 		if (result) {
 			return result
-			//   const filteredStores = result.stores.filter((store) => {
-			//     const addressParts = store.address.split(',');
-			//     return addressParts.length === 2 && addressParts[1].trim().toLowerCase() === area.toLowerCase();
-			//   });
-			//   return {
-			//     price: result.price,
-			//     stores: filteredStores,
-			//   };
 		} else {
 			console.error('result is null')
 			return { message: 'result is null' }
 		}
-	} catch (e) {
+	} catch (e: any) {
 		console.error(e.message, 'could not get store data')
+		return undefined
 	} finally {
-		browser.close()
+		await browser.close()
 	}
 }
 
-module.exports = getProductsFromSearch
+export default getProductsFromSearch
+

@@ -1,12 +1,16 @@
-const puppeteer = require('puppeteer')
-require('dotenv').config()
+import puppeteer from 'puppeteer'
 
-const getTriggiz = async () => {
+interface TriggizResult {
+	triggiz: string
+	milestone: string
+}
+
+const getTriggiz = async (): Promise<TriggizResult> => {
 	const isProduction = process.env.NODE_ENV === 'production'
 
 	const browser = await puppeteer.launch({
 		executablePath: isProduction ? '/usr/bin/chromium' : undefined,
-		headless: isProduction ? 'new' : false,
+		headless: isProduction ? true : false,
 		ignoreDefaultArgs: ['--disable-extensions'],
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	})
@@ -14,7 +18,7 @@ const getTriggiz = async () => {
 	const page = await browser.newPage()
 
 	try {
-		await page.goto(process.env.LOGIN_URL, {
+		await page.goto(process.env.LOGIN_URL!, {
 			waitUntil: 'networkidle2',
 		})
 
@@ -23,34 +27,44 @@ const getTriggiz = async () => {
 
 		await page.evaluate(
 			(email, password) => {
-				document.querySelector('input[id="UserName"]').value = email
-				document.querySelector('input[id="Password"]').value = password
+				;(
+					document.querySelector(
+						'input[id="UserName"]'
+					) as HTMLInputElement
+				).value = email!
+				;(
+					document.querySelector(
+						'input[id="Password"]'
+					) as HTMLInputElement
+				).value = password!
 			},
 			email,
 			password
 		)
 
 		await Promise.all([
-			page.$eval('button[type="submit"]', (form) => form.click()),
+			page.$eval('button[type="submit"]', (form) =>
+				(form as HTMLButtonElement).click()
+			),
 			page.waitForNavigation({ waitUntil: 'networkidle2' }),
 		])
 
 		const triggiz = await page.$eval(
 			'.independent-section .content-wrapper .drop-chart .drops-text',
-			(el) => el.textContent
+			(el) => el.textContent || ''
 		)
 		const milestone = await page.$eval(
 			'.independent-section .content-wrapper .drop-chart .sub-text',
-			(el) => el.textContent
+			(el) => el.textContent || ''
 		)
 
 		return { triggiz, milestone }
 	} catch (error) {
 		console.error('Error during login with Puppeteer:', error)
-		return { minValue: null, maxValue: null }
+		return { triggiz: '', milestone: '' }
 	} finally {
 		await browser.close()
 	}
 }
 
-module.exports = getTriggiz
+export default getTriggiz
