@@ -6,6 +6,11 @@ interface TriggizResult {
 }
 
 const getTriggiz = async (): Promise<TriggizResult> => {
+	if (!process.env.LOGIN_URL) {
+		console.log('LOGIN_URL not set, skipping Triggiz check');
+		return { triggiz: '', milestone: '' };
+	}
+
 	const isProduction = process.env.NODE_ENV === 'production'
 
 	const browser = await puppeteer.launch({
