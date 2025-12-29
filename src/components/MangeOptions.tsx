@@ -107,7 +107,7 @@ const ManageOptions: NextPage<Props> = ({ visible, onClose }) => {
 											/>
 										) : (
 											<span className='text-2xl'>
-												<i className='fa-solid fa-martini-glass'></i>
+												<i className='fa-solid fa-martini-glass' aria-hidden='true'></i>
 											</span>
 										)}
 									</div>
@@ -138,7 +138,7 @@ const ManageOptions: NextPage<Props> = ({ visible, onClose }) => {
 							target='_blank'
 						>
 							Systembolaget
-							<i className='text-sm fa-solid fa-up-right-from-square ms-2'></i>
+							<i className='text-sm fa-solid fa-up-right-from-square ms-2' aria-hidden='true'></i>
 						</a>
 					</div>
 				</div>

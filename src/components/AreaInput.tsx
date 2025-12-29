@@ -113,7 +113,7 @@ const AreaInput: NextPage<Props> = ({ onInputChange }) => {
 					onClick={handleClear}
 					title='Rensa'
 				>
-					<i className='fa-solid fa-x'></i>
+					<i className='fa-solid fa-x' aria-hidden='true'></i>
 					<div className='sr-only'>Rensa</div>
 				</button>
 			)}
@@ -148,7 +148,7 @@ const AreaInput: NextPage<Props> = ({ onInputChange }) => {
 											onClick={() => handleDeleteArea(index)}
 											className='w-[35px] bg-slate-700 rounded-md p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
 										>
-											<i className='fa-solid fa-minus text-white'></i>
+											<i className='fa-solid fa-minus text-white' aria-hidden='true'></i>
 										</button>
 									</div>
 								))}
@@ -175,7 +175,7 @@ const AreaInput: NextPage<Props> = ({ onInputChange }) => {
 									onClick={() => handlePinClick(suggestion)}
 									className='w-[35px] bg-slate-700 rounded-md p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity'
 								>
-									<i className='fa-solid text-xs fa-thumbtack text-white'></i>
+									<i className='fa-solid text-xs fa-thumbtack text-white' aria-hidden='true'></i>
 								</button>
 							</div>
 						))}

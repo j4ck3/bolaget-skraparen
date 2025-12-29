@@ -35,7 +35,7 @@ function BackToTopButton() {
 			}`}
 			onClick={scrollToTop}
 		>
-			<i className='fa-solid fa-caret-up'></i>
+			<i className='fa-solid fa-caret-up' aria-hidden='true'></i>
 			<span className='sr-only'>top</span>
 		</button>
 	) : null
