@@ -51,17 +51,14 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 	const page = await browser.newPage()
 
 	// set age + cookies consent cookie
-	const ageCookieValue = '{"state":{"verified":true},"version":0}'
 	await page.setCookie({
 		name: 'systembolaget.age',
-		value: ageCookieValue,
+		value: '{"state":{"verified":true},"version":0}',
 		domain: '.systembolaget.se',
 	})
-	const consentCookieValue =
-		'{"state":{"consentTypes":["useful","profiling","mandatory","statistical"]},"version":0}'
 	await page.setCookie({
 		name: 'systembolaget.consent',
-		value: consentCookieValue,
+		value: '{"state":{"consentTypes":["useful","profiling","mandatory","statistical"]},"version":0}',
 		domain: '.systembolaget.se',
 	})
 
@@ -70,56 +67,55 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		timeout: 30000,
 	})
 
-	// Wait for the page to be interactive
-	await page
-		.waitForFunction(
-			() =>
-				document.readyState === 'complete' ||
-				document.readyState === 'interactive',
-			{ timeout: 5000 }
-		)
-		.catch(() => {})
-
 	// Find and click the "Välj butik" button to open the store finder
-	// The button is inside #PdpCardInStore section
 	let buttonFound = false
 	try {
-		// Wait for the PdpCardInStore section
-		await page.waitForSelector('#PdpCardInStore', { timeout: 10000 })
+		// Wait for the button to appear and be clickable
+		await page.waitForFunction(
+			() => {
+				const buttons = document.querySelectorAll('#PdpCardInStore button')
+				return Array.from(buttons).some((btn) =>
+					btn.textContent?.includes('Välj butik')
+				)
+			},
+			{ timeout: 15000 }
+		)
 
-		// Find the "Välj butik" button - it contains the text "Välj butik"
 		const button = await page.evaluateHandle(() => {
 			const buttons = Array.from(
 				document.querySelectorAll('#PdpCardInStore button')
 			)
-			return buttons.find((btn) => {
-				const text = btn.textContent?.trim()
-				return text === 'Välj butik' || text?.includes('Välj butik')
-			})
+			return buttons.find((btn) => btn.textContent?.includes('Välj butik'))
 		})
 
 		const btnElement = button.asElement() as
 			| import('puppeteer').ElementHandle<Element>
 			| null
+
 		if (btnElement) {
 			await btnElement.click()
-			console.log('Clicked "Välj butik" button')
 			buttonFound = true
-			// Wait for the store modal to fully load
-			await page.waitForSelector('button.flex.w-full.flex-col', {
-				timeout: 10000,
-			})
 
-			// Wait a moment for the modal to fully load
-			console.log('Store modal loaded, waiting for initial render...')
-			await new Promise((resolve) => setTimeout(resolve, 1000))
+			// Wait for store buttons to appear AND have content (address text)
+			await page.waitForFunction(
+				() => {
+					const btns = document.querySelectorAll(
+						'button.flex.w-full.flex-col'
+					)
+					if (btns.length === 0) return false
+					// Check that at least one button has address content
+					return Array.from(btns).some((btn) =>
+						btn.querySelector('p.sans-200')?.textContent?.trim()
+					)
+				},
+				{ timeout: 15000 }
+			)
 		}
 	} catch (e: any) {
 		console.error('Could not find or click "Välj butik" button:', e.message)
 	}
 
 	if (!buttonFound) {
-		console.error('Could not find the store finder button')
 		await browser.close()
 		return {
 			success: false,
@@ -127,94 +123,67 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		}
 	}
 
-	// Wait for the search field or store list to appear
+	// Filter stores by area if provided
 	try {
-		// Wait for either the search field or store buttons to appear
-		await Promise.race([
-			page.waitForSelector('#search', { timeout: 5000 }).catch(() => null),
-			page
-				.waitForSelector('button[class*="flex w-full flex-col"]', {
-					timeout: 5000,
-				})
-				.catch(() => null),
-		])
-
-		// If area is provided and search field exists, filter stores first
 		if (area) {
 			const searchField = await page.$('#search')
 			if (searchField) {
-				console.log(`Filtering stores by area: ${area}`)
-				await searchField.click()
-				await searchField.type(area, { delay: 50 })
-				// Wait for filtered results to appear
-				await new Promise((resolve) => setTimeout(resolve, 1000))
-
-				// Wait for stock counts to load on filtered stores
-				// Scroll through the filtered list to trigger lazy loading
-				console.log(
-					'Scrolling through filtered stores to load all stock counts...'
+				// Get initial button count before filtering
+				const initialCount = await page.evaluate(
+					() =>
+						document.querySelectorAll('button.flex.w-full.flex-col')
+							.length
 				)
+
+				await searchField.click()
+				await searchField.type(area, { delay: 30 })
+
+				// Wait for filtered results - either fewer buttons or content change
+				await page.waitForFunction(
+					(prevCount: number) => {
+						const btns = document.querySelectorAll(
+							'button.flex.w-full.flex-col'
+						)
+						// Either count changed or we have stock data loaded
+						return (
+							btns.length !== prevCount ||
+							Array.from(btns).some((btn) =>
+								btn.textContent?.match(/\d+\s*st/i)
+							)
+						)
+					},
+					{ timeout: 10000 },
+					initialCount
+				)
+
+				// Scroll to trigger lazy loading, then wait for stock counts
 				const scrollContainer = await page.$('div.overflow-y-auto')
 				if (scrollContainer) {
-					// Scroll down slowly to trigger lazy loading
-					for (let scrollPos = 0; scrollPos <= 1000; scrollPos += 200) {
-						await page.evaluate((pos) => {
-							const el = document.querySelector('div.overflow-y-auto')
-							if (el) el.scrollTop = pos
-						}, scrollPos)
-						await new Promise((resolve) => setTimeout(resolve, 400))
-					}
-					// Scroll back to top
+					// Quick scroll to bottom and back to trigger loading
+					await page.evaluate(() => {
+						const el = document.querySelector('div.overflow-y-auto')
+						if (el) el.scrollTop = el.scrollHeight
+					})
+
+					// Wait for any stock count to appear
+					await page
+						.waitForFunction(
+							() => {
+								const btns = document.querySelectorAll(
+									'button.flex.w-full.flex-col'
+								)
+								return Array.from(btns).some((btn) =>
+									btn.textContent?.match(/\d+\s*st/i)
+								)
+							},
+							{ timeout: 5000 }
+						)
+						.catch(() => {})
+
 					await page.evaluate(() => {
 						const el = document.querySelector('div.overflow-y-auto')
 						if (el) el.scrollTop = 0
 					})
-					await new Promise((resolve) => setTimeout(resolve, 500))
-				}
-
-				// Now wait for all stock counts to stabilize
-				console.log('Waiting for stock counts to stabilize...')
-				let lastWithStock = 0
-				let stableCount = 0
-				for (let i = 0; i < 12; i++) {
-					await new Promise((resolve) => setTimeout(resolve, 400))
-					const stockStatus = await page.evaluate(() => {
-						const btns = document.querySelectorAll(
-							'button.flex.w-full.flex-col'
-						)
-						let total = 0
-						let withStock = 0
-						btns.forEach((btn) => {
-							const rect = btn.getBoundingClientRect()
-							// Only count visible buttons (in the modal)
-							if (rect.height > 0 && rect.width > 0) {
-								total++
-								if (btn.textContent?.match(/\d+\s*st/i)) {
-									withStock++
-								}
-							}
-						})
-						return { total, withStock }
-					})
-					console.log(
-						`Stock check ${i + 1}: ${stockStatus.withStock}/${
-							stockStatus.total
-						} stores have stock`
-					)
-
-					if (
-						stockStatus.withStock === lastWithStock &&
-						stockStatus.total > 0
-					) {
-						stableCount++
-						if (stableCount >= 2) {
-							console.log('Stock counts stable')
-							break
-						}
-					} else {
-						stableCount = 0
-					}
-					lastWithStock = stockStatus.withStock
 				}
 			}
 		}
@@ -244,88 +213,120 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		console.error('Could not extract price:', e.message)
 	}
 
-	// Build up stock counts by scrolling through the list
-	// Stock counts are lazy-loaded when items become visible
+	// Get list of filtered store addresses (for early exit optimization)
+	const filteredAddresses: Set<string> = new Set()
+	if (area) {
+		const lowerArea = area.toLowerCase()
+		const addresses = await page.evaluate((areaFilter: string) => {
+			const btns = document.querySelectorAll('button.flex.w-full.flex-col')
+			const matching: string[] = []
+			btns.forEach((btn) => {
+				const addrEl = btn.querySelector('p.sans-200')
+				const fullAddrEl = btn.querySelector('p.text-black65')
+				const addr = addrEl?.textContent?.trim().toLowerCase() || ''
+				const fullAddr = fullAddrEl?.textContent?.trim().toLowerCase() || ''
+				const city = fullAddr.split(',').pop()?.trim() || ''
+
+				if (city === areaFilter || fullAddr.includes(areaFilter)) {
+					matching.push(addr)
+				}
+			})
+			return matching
+		}, lowerArea)
+		addresses.forEach((a) => filteredAddresses.add(a))
+	}
+
+	// Helper to check if all filtered stores have stock
+	const allFilteredHaveStock = () => {
+		if (!area || filteredAddresses.size === 0) return false
+		for (const addr of filteredAddresses) {
+			if (!stockMap.has(addr)) return false
+		}
+		return true
+	}
+
+	// Collect stock data by scrolling
 	const stockMap: Map<string, string> = new Map()
 	try {
-		// Get scroll container info
-		const scrollInfo = await page.evaluate(() => {
+		const scrollHeight = await page.evaluate(() => {
 			const el = document.querySelector('div.overflow-y-auto')
-			if (!el) return { height: 3000, containerTop: 0 }
-			const rect = el.getBoundingClientRect()
-			return {
-				height: el.scrollHeight,
-				containerTop: rect.top,
-				containerHeight: rect.height,
-			}
+			return el?.scrollHeight || 3000
 		})
-		console.log(`Scroll container height: ${scrollInfo.height}`)
 
-		// Scroll through the list - balance between coverage and speed
-		const scrollStep = 600 // Medium steps
-		const maxScroll = Math.min(scrollInfo.height, 8000) // Limit to reasonable amount
+		const maxScroll = Math.min(scrollHeight, 8000)
 
-		for (let pos = 0; pos <= maxScroll; pos += scrollStep) {
-			// Scroll to position
+		// PHASE 1: Fast scroll to trigger all lazy loading
+		for (let pos = 0; pos <= maxScroll; pos += 400) {
+			await page.evaluate((scrollPos) => {
+				const el = document.querySelector('div.overflow-y-auto')
+				if (el) el.scrollTop = scrollPos
+			}, pos)
+			await new Promise((r) => setTimeout(r, 50))
+		}
+
+		// Scroll back to top
+		await page.evaluate(() => {
+			const el = document.querySelector('div.overflow-y-auto')
+			if (el) el.scrollTop = 0
+		})
+
+		// PHASE 2: Wait for network to settle
+		await page.evaluate(() => {
+			return new Promise<void>((resolve) => {
+				let timeout: ReturnType<typeof setTimeout>
+				const check = () => {
+					clearTimeout(timeout)
+					timeout = setTimeout(resolve, 500)
+				}
+				check()
+				setTimeout(resolve, 3000)
+			})
+		})
+
+		// PHASE 3: Scroll and collect - exit early if all filtered stores have stock
+		for (let pos = 0; pos <= maxScroll; pos += 300) {
 			await page.evaluate((scrollPos) => {
 				const el = document.querySelector('div.overflow-y-auto')
 				if (el) el.scrollTop = scrollPos
 			}, pos)
 
-			// Wait for lazy-loaded content - check the scroll container's visible area
-			await new Promise((resolve) => setTimeout(resolve, 150))
+			await page
+				.waitForFunction(
+					() => {
+						const container = document.querySelector(
+							'div.overflow-y-auto'
+						)
+						if (!container) return true
 
-			// Wait until visible items in viewport have stock counts
-			let lastVisibleWithStock = 0
-			let stableCount = 0
-			for (let check = 0; check < 8; check++) {
-				const visibleStatus = await page.evaluate(() => {
-					const container = document.querySelector('div.overflow-y-auto')
-					if (!container) return { visible: 0, withStock: 0 }
+						const containerRect = container.getBoundingClientRect()
+						const btns = container.querySelectorAll(
+							'button.flex.w-full.flex-col'
+						)
 
-					const containerRect = container.getBoundingClientRect()
-					const btns = container.querySelectorAll(
-						'button.flex.w-full.flex-col'
-					)
+						let visible = 0
+						let withStock = 0
 
-					let visible = 0
-					let withStock = 0
-
-					btns.forEach((btn) => {
-						const rect = btn.getBoundingClientRect()
-						// Check if button is visible within the scroll container
-						if (
-							rect.top >= containerRect.top - 50 &&
-							rect.bottom <= containerRect.bottom + 50
-						) {
-							visible++
-							// Check for stock text (e.g., "1651 st")
-							const stockEl = btn.querySelector('p.text-bottle-700')
-							if (stockEl?.textContent?.match(/\d+\s*st/i)) {
-								withStock++
+						btns.forEach((btn) => {
+							const rect = btn.getBoundingClientRect()
+							if (
+								rect.top >= containerRect.top - 100 &&
+								rect.bottom <= containerRect.bottom + 100
+							) {
+								visible++
+								const stockEl = btn.querySelector('p.text-bottle-700')
+								if (stockEl?.textContent?.match(/\d+\s*st/i)) {
+									withStock++
+								}
 							}
-						}
-					})
+						})
 
-					return { visible, withStock }
-				})
+						return visible === 0 || withStock >= visible
+					},
+					{ timeout: 2000 }
+				)
+				.catch(() => {})
 
-				// If all visible items have stock counts, we're good
-				if (
-					visibleStatus.visible > 0 &&
-					visibleStatus.withStock === lastVisibleWithStock &&
-					visibleStatus.withStock > 0
-				) {
-					stableCount++
-					if (stableCount >= 2) break
-				} else {
-					stableCount = 0
-				}
-				lastVisibleWithStock = visibleStatus.withStock
-				await new Promise((resolve) => setTimeout(resolve, 200))
-			}
-
-			// Collect stock counts from ALL buttons (not just visible - they retain their values)
+			// Collect stock data
 			const allStocks = await page.evaluate(() => {
 				const btns = document.querySelectorAll(
 					'button.flex.w-full.flex-col'
@@ -345,24 +346,58 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 			})
 
 			allStocks.forEach(({ addr, stock }) => {
-				// Always update - later values might be more accurate
 				stockMap.set(addr, stock)
 			})
+
+			// Early exit if all filtered stores have stock
+			if (allFilteredHaveStock()) {
+				break
+			}
 		}
-		console.log(`Collected ${stockMap.size} stores with stock counts`)
+
+		// PHASE 4: Final pass (skip if already got all filtered stores)
+		if (!allFilteredHaveStock()) {
+			for (let pos = 0; pos <= maxScroll; pos += 250) {
+				await page.evaluate((scrollPos) => {
+					const el = document.querySelector('div.overflow-y-auto')
+					if (el) el.scrollTop = scrollPos
+				}, pos)
+				await new Promise((r) => setTimeout(r, 150))
+
+				const allStocks = await page.evaluate(() => {
+					const btns = document.querySelectorAll(
+						'button.flex.w-full.flex-col'
+					)
+					const result: { addr: string; stock: string }[] = []
+					btns.forEach((btn) => {
+						const addrEl = btn.querySelector('p.sans-200')
+						const stockEl = btn.querySelector('p.text-bottle-700')
+						const addr = addrEl?.textContent?.trim().toLowerCase() || ''
+						const stockText = stockEl?.textContent?.trim() || ''
+						const stockMatch = stockText.match(/(\d+)\s*st/i)
+						if (addr && stockMatch) {
+							result.push({ addr, stock: stockMatch[1] })
+						}
+					})
+					return result
+				})
+
+				allStocks.forEach(({ addr, stock }) => {
+					stockMap.set(addr, stock)
+				})
+
+				if (allFilteredHaveStock()) {
+					break
+				}
+			}
+		}
 	} catch (e: any) {
 		console.error('Error during scroll collection:', e.message)
 	}
 
-	// Get all stores with stock information
+	// Extract all stores with stock information
 	try {
-		// Convert stockMap to object for passing to evaluate
 		const stockData = Object.fromEntries(stockMap)
-		console.log(
-			`Using pre-collected stock data for ${
-				Object.keys(stockData).length
-			} stores`
-		)
 
 		const stores = await page.evaluate(
 			(collectedStocks: Record<string, string>) => {
@@ -379,17 +414,14 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 						addressElement?.textContent?.trim() || ''
 					).toLowerCase()
 
-					// Try to get stock from DOM first
 					let amount = '0'
 					const stockEl = button.querySelector('p.text-bottle-700')
 					const stockText = stockEl?.textContent?.trim() || ''
 					const stockMatch = stockText.match(/(\d+)\s*st/i)
+
 					if (stockMatch) {
 						amount = stockMatch[1]
-					}
-
-					// Fall back to pre-collected data if no stock found in DOM
-					if (amount === '0' && collectedStocks[address]) {
+					} else if (collectedStocks[address]) {
 						amount = collectedStocks[address]
 					}
 
@@ -405,29 +437,18 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 			stockData
 		)
 
-		// Log summary
-		const withStock = stores.filter((s) => s.amount !== '0').length
-		console.log(`Extracted ${stores.length} stores, ${withStock} with stock`)
-
-		const cleanedStores: Store[] = stores
-
 		// Filter stores by area if provided
-		let filteredStores = cleanedStores
-		if (area) {
-			filteredStores = cleanedStores.filter((store) => {
-				return (
-					store.city.toLowerCase() === area.toLowerCase() ||
-					store.fullAddress.toLowerCase().includes(area.toLowerCase())
-				)
-			})
-			console.log(
-				`\nFiltered to ${filteredStores.length} stores in area: ${area}`
-			)
-		}
+		const filteredStores: Store[] = area
+			? stores.filter(
+					(store) =>
+						store.city.toLowerCase() === area.toLowerCase() ||
+						store.fullAddress.includes(area.toLowerCase())
+			  )
+			: stores
 
 		return {
 			success: true,
-			price: price,
+			price,
 			stores: filteredStores,
 		}
 	} catch (e: any) {
