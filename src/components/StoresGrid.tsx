@@ -42,7 +42,7 @@ const StoresGrid: NextPage<Props> = ({
               <span className="mx-2 text-gray-600">|</span>
               {result.stores.length} butiker
               <span className="mx-2 text-gray-600">|</span>
-              {searchedArea}
+              <span className="capitalize">{searchedArea}</span>
             </h3>
           </div>
 
@@ -52,7 +52,7 @@ const StoresGrid: NextPage<Props> = ({
               key={index}
             >
               <div className="w-4/6 flex items-center">
-                <h3 className="text-sm font-medium text-white">
+                <h3 className="text-sm font-medium text-white capitalize">
                   {store.address}
                 </h3>
               </div>
