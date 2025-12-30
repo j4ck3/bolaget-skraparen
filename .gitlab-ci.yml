@@ -27,6 +27,8 @@ build:
 
 deploy:
   stage: deploy
+  needs:
+    - build
   image: alpine:latest
   before_script:
     - apk add --no-cache openssh-client docker-cli docker-compose
@@ -54,5 +56,3 @@ deploy:
   only:
     - main
     - master
-  depends_on:
-    - build
