@@ -3,18 +3,14 @@ stages:
 
 variables:
    DOCKER_DRIVER: overlay2
-   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 build:
    stage: build
-   image: docker:24
-   services:
-      - docker:24-dind
+   image: docker:latest
    tags:
       - docker
       - build
-   variables:
-      DOCKER_TLS_CERTDIR: '/certs'
    before_script:
       - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
       - docker buildx create --name builder --use || true
