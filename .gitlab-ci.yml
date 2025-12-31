@@ -7,10 +7,14 @@ variables:
 
 build:
    stage: build
-   image: docker:latest
+   image: docker:24
+   services:
+      - docker:24-dind
    tags:
       - docker
       - build
+   variables:
+      DOCKER_TLS_CERTDIR: '/certs'
    before_script:
       - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
       - docker buildx create --name builder --use || true
