@@ -12,7 +12,6 @@ build:
       - docker
       - build
    before_script:
-      - export DOCKER_HOST=unix:///var/run/docker.sock
       - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
       - docker buildx create --name builder --use || true
       - docker buildx inspect --bootstrap
