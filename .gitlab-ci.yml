@@ -1,58 +1,21 @@
 stages:
   - build
-  - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: "/certs"
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
-  DOCKER_BUILDKIT: 1
-  COMPOSE_PROJECT_DIR: "${COMPOSE_PROJECT_DIR"
 
 build:
   stage: build
-  image: docker:24
-  services:
-    - docker:24-dind
+  image: docker:latest
+  tags:
+    - docker
+    - build
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker buildx create --name builder --use || true
     - docker buildx inspect --bootstrap
   script:
-    - docker buildx build --platform linux/arm64 -t $IMAGE_TAG -t $CI_REGISTRY_IMAGE:latest --push .
+    - docker buildx build --platform linux/arm64 -t $IMAGE_TAG -t $CI_REGISTRY_IMAGE:latest -f Dockerfile . --push
   only:
-    - main
-    - master
-    - develop
-
-deploy:
-  stage: deploy
-  needs:
-    - build
-  image: alpine:latest
-  before_script:
-    - apk add --no-cache openssh-client docker-cli docker-compose
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -H $VPS_IP >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-  script:
-    - |
-      ssh -o StrictHostKeyChecking=no $SSH_USER@$VPS_IP << EOF
-        set -e
-        
-        # Navigate to docker-compose directory
-        cd $COMPOSE_PROJECT_DIR
-        
-        # Pull the new image and restart the service
-        docker-compose pull bolaget-frontend
-        docker-compose up -d --no-deps bolaget-frontend
-      EOF
-  environment:
-    name: production
-    url: https://bolaget.hjacke.com
-  only:
-    - main
     - master
