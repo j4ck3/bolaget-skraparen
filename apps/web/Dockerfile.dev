@@ -1,14 +1,12 @@
-FROM oven/bun:latest
+FROM oven/bun:1
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json bun.lockb* ./
-RUN bun install
+# Dependencies are baked into the image and copied into the node_modules
+# volume on first start; source is bind-mounted over /app by compose.
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Expose port
 EXPOSE 3000
 
-# Default command (can be overridden in docker-compose)
-CMD ["bun", "--bun", "next", "dev"]
-
+CMD ["bun", "--bun", "next", "dev", "--hostname", "0.0.0.0", "--port", "3000"]

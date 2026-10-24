@@ -1,19 +1,17 @@
-FROM oven/bun:latest
+FROM oven/bun:1
 
-# Install dependencies and Chromium browser
 RUN apt-get update && \
-    apt-get install -y chromium gnupg unzip && \
+    apt-get install -y --no-install-recommends chromium && \
     rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json bun.lockb* ./
-RUN bun install
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 
-# Expose port
 EXPOSE 5000
 
-# Default command (can be overridden in docker-compose)
 CMD ["bun", "--watch", "src/app.ts"]
-
