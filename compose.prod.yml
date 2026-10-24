@@ -1,0 +1,54 @@
+# Production stack on the "web" host, behind Traefik.
+# Deployed by .github/workflows/build-deploy.yml via deploy/deploy.sh.
+# Secrets, if any, go in a .env next to this file on the host (never committed).
+name: bolaget-skraparen
+
+services:
+  bolaget-frontend:
+    image: ghcr.io/j4ck3/bolaget-web:${WEB_TAG:-latest}
+    container_name: bolaget-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://bolaget.hjacke.com/api
+      - API_URL=http://stock-scraper-api:5000
+    networks:
+      - traefik
+      - app-network
+    depends_on:
+      - stock-scraper-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bolaget.rule=Host(`bolaget.hjacke.com`)"
+      - "traefik.http.routers.bolaget.entrypoints=websecure"
+      - "traefik.http.routers.bolaget.tls.certresolver=letsencrypt"
+      - "traefik.http.services.bolaget.loadbalancer.server.port=3000"
+      - "traefik.docker.network=traefik"
+
+  stock-scraper-api:
+    image: ghcr.io/j4ck3/stock-scraper:${SCRAPER_TAG:-latest}
+    container_name: stock-scraper-api
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    shm_size: 1gb
+    networks:
+      - traefik
+      - app-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bolaget-api.rule=Host(`bolaget.hjacke.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.bolaget-api.entrypoints=websecure"
+      - "traefik.http.routers.bolaget-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.bolaget-api.loadbalancer.server.port=5000"
+      - "traefik.docker.network=traefik"
+
+networks:
+  traefik:
+    external: true
+  app-network:
+    driver: bridge
