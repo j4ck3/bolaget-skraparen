@@ -32,6 +32,7 @@ jobs:
               - 'apps/scraper/**'
             deploy:
               - 'compose.prod.yml'
+              - 'deploy/**'
 
   build:
     needs: changes

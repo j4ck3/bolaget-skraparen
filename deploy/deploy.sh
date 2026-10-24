@@ -24,7 +24,11 @@ docker compose -f "$tmp" config -q
 mv "$tmp" compose.yml
 trap - EXIT
 
-docker compose -f compose.yml pull
+# The images are public. Pull anonymously so stale ghcr.io credentials in the
+# user's docker config (used by other private packages) cannot break the deploy.
+anon=$(mktemp -d)
+DOCKER_CONFIG=$anon docker compose -f compose.yml pull
+rm -rf "$anon"
 docker compose -f compose.yml up -d --remove-orphans
 docker image prune -f >/dev/null
 docker compose -f compose.yml ps
