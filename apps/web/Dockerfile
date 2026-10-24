@@ -1,45 +1,30 @@
-FROM oven/bun:latest AS base
+FROM oven/bun:1 AS base
 
-# Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
-
-# Copy package files
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
-# Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Build Next.js
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN bun run build
 
-# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
-ENV NODE_ENV=production
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs nextjs
 
-RUN groupadd --system --gid 1001 nodejs
-RUN useradd --system --uid 1001 nextjs
-
-# Copy necessary files
-# Note: public assets are included in .next/standalone if they exist
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
-
 EXPOSE 3000
-
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
 CMD ["bun", "server.js"]
-

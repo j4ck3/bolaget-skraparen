@@ -1,34 +1,22 @@
-FROM oven/bun:latest
+FROM oven/bun:1
 
-# Install dependencies and Chromium browser
 RUN apt-get update && \
-    apt-get install -y chromium gnupg unzip && \
+    apt-get install -y --no-install-recommends chromium && \
     rm -rf /var/lib/apt/lists/*
 
-# Verify PATH
-RUN which chromium
+ENV NODE_ENV=production \
+    PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PORT=5000
 
-
-# Create a user with name 'app' and group that will be used to run the app
 RUN groupadd -r app && useradd -rm -g app -G audio,video app
 
 WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
 
-# Copy and setup your project 
-
-COPY package.json /app/package.json
-
-RUN bun install
-
-COPY . /app
-
-EXPOSE 5000
-
-# Give app user access to all the project folder
-RUN chown -R app:app /app
-
-RUN chmod -R 777 /app
+COPY --chown=app:app . .
 
 USER app
-
-CMD [ "bun", "run", "start" ]
+EXPOSE 5000
+CMD ["bun", "run", "start"]
