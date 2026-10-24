@@ -100,12 +100,12 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 			await page.waitForFunction(
 				() => {
 					const btns = document.querySelectorAll(
-						'button.flex.w-full.flex-col'
+						'[role=dialog] button.flex.w-full.flex-col'
 					)
 					if (btns.length === 0) return false
 					// Check that at least one button has address content
 					return Array.from(btns).some((btn) =>
-						btn.querySelector('p.sans-200')?.textContent?.trim()
+						btn.querySelector('span.sans-strong-200')?.textContent?.trim()
 					)
 				},
 				{ timeout: 15000 }
@@ -126,12 +126,12 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 	// Filter stores by area if provided
 	try {
 		if (area) {
-			const searchField = await page.$('#search')
+			const searchField = await page.$('[role=dialog] #search')
 			if (searchField) {
 				// Get initial button count before filtering
 				const initialCount = await page.evaluate(
 					() =>
-						document.querySelectorAll('button.flex.w-full.flex-col')
+						document.querySelectorAll('[role=dialog] button.flex.w-full.flex-col')
 							.length
 				)
 
@@ -142,7 +142,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 				await page.waitForFunction(
 					(prevCount: number) => {
 						const btns = document.querySelectorAll(
-							'button.flex.w-full.flex-col'
+							'[role=dialog] button.flex.w-full.flex-col'
 						)
 						// Either count changed or we have stock data loaded
 						return (
@@ -157,11 +157,11 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 				)
 
 				// Scroll to trigger lazy loading, then wait for stock counts
-				const scrollContainer = await page.$('div.overflow-y-auto')
+				const scrollContainer = await page.$('[role=dialog] div.overflow-y-auto')
 				if (scrollContainer) {
 					// Quick scroll to bottom and back to trigger loading
 					await page.evaluate(() => {
-						const el = document.querySelector('div.overflow-y-auto')
+						const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 						if (el) el.scrollTop = el.scrollHeight
 					})
 
@@ -170,7 +170,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 						.waitForFunction(
 							() => {
 								const btns = document.querySelectorAll(
-									'button.flex.w-full.flex-col'
+									'[role=dialog] button.flex.w-full.flex-col'
 								)
 								return Array.from(btns).some((btn) =>
 									btn.textContent?.match(/\d+\s*st/i)
@@ -181,7 +181,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 						.catch(() => {})
 
 					await page.evaluate(() => {
-						const el = document.querySelector('div.overflow-y-auto')
+						const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 						if (el) el.scrollTop = 0
 					})
 				}
@@ -218,11 +218,11 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 	if (area) {
 		const lowerArea = area.toLowerCase()
 		const addresses = await page.evaluate((areaFilter: string) => {
-			const btns = document.querySelectorAll('button.flex.w-full.flex-col')
+			const btns = document.querySelectorAll('[role=dialog] button.flex.w-full.flex-col')
 			const matching: string[] = []
 			btns.forEach((btn) => {
-				const addrEl = btn.querySelector('p.sans-200')
-				const fullAddrEl = btn.querySelector('p.text-black65')
+				const addrEl = btn.querySelector('span.sans-strong-200')
+				const fullAddrEl = btn.querySelector('span.text-muted-foreground')
 				const addr = addrEl?.textContent?.trim().toLowerCase() || ''
 				const fullAddr = fullAddrEl?.textContent?.trim().toLowerCase() || ''
 				const city = fullAddr.split(',').pop()?.trim() || ''
@@ -249,7 +249,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 	const stockMap: Map<string, string> = new Map()
 	try {
 		const scrollHeight = await page.evaluate(() => {
-			const el = document.querySelector('div.overflow-y-auto')
+			const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 			return el?.scrollHeight || 3000
 		})
 
@@ -258,7 +258,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		// PHASE 1: Fast scroll to trigger all lazy loading
 		for (let pos = 0; pos <= maxScroll; pos += 400) {
 			await page.evaluate((scrollPos) => {
-				const el = document.querySelector('div.overflow-y-auto')
+				const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 				if (el) el.scrollTop = scrollPos
 			}, pos)
 			await new Promise((r) => setTimeout(r, 50))
@@ -266,7 +266,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 
 		// Scroll back to top
 		await page.evaluate(() => {
-			const el = document.querySelector('div.overflow-y-auto')
+			const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 			if (el) el.scrollTop = 0
 		})
 
@@ -286,7 +286,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		// PHASE 3: Scroll and collect - exit early if all filtered stores have stock
 		for (let pos = 0; pos <= maxScroll; pos += 300) {
 			await page.evaluate((scrollPos) => {
-				const el = document.querySelector('div.overflow-y-auto')
+				const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 				if (el) el.scrollTop = scrollPos
 			}, pos)
 
@@ -294,13 +294,13 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 				.waitForFunction(
 					() => {
 						const container = document.querySelector(
-							'div.overflow-y-auto'
+							'[role=dialog] div.overflow-y-auto'
 						)
 						if (!container) return true
 
 						const containerRect = container.getBoundingClientRect()
 						const btns = container.querySelectorAll(
-							'button.flex.w-full.flex-col'
+							'[role=dialog] button.flex.w-full.flex-col'
 						)
 
 						let visible = 0
@@ -313,7 +313,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 								rect.bottom <= containerRect.bottom + 100
 							) {
 								visible++
-								const stockEl = btn.querySelector('p.text-bottle-700')
+								const stockEl = btn.querySelector('div.items-center > span')
 								if (stockEl?.textContent?.match(/\d+\s*st/i)) {
 									withStock++
 								}
@@ -329,12 +329,12 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 			// Collect stock data
 			const allStocks = await page.evaluate(() => {
 				const btns = document.querySelectorAll(
-					'button.flex.w-full.flex-col'
+					'[role=dialog] button.flex.w-full.flex-col'
 				)
 				const result: { addr: string; stock: string }[] = []
 				btns.forEach((btn) => {
-					const addrEl = btn.querySelector('p.sans-200')
-					const stockEl = btn.querySelector('p.text-bottle-700')
+					const addrEl = btn.querySelector('span.sans-strong-200')
+					const stockEl = btn.querySelector('div.items-center > span')
 					const addr = addrEl?.textContent?.trim().toLowerCase() || ''
 					const stockText = stockEl?.textContent?.trim() || ''
 					const stockMatch = stockText.match(/(\d+)\s*st/i)
@@ -359,19 +359,19 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		if (!allFilteredHaveStock()) {
 			for (let pos = 0; pos <= maxScroll; pos += 250) {
 				await page.evaluate((scrollPos) => {
-					const el = document.querySelector('div.overflow-y-auto')
+					const el = document.querySelector('[role=dialog] div.overflow-y-auto')
 					if (el) el.scrollTop = scrollPos
 				}, pos)
 				await new Promise((r) => setTimeout(r, 150))
 
 				const allStocks = await page.evaluate(() => {
 					const btns = document.querySelectorAll(
-						'button.flex.w-full.flex-col'
+						'[role=dialog] button.flex.w-full.flex-col'
 					)
 					const result: { addr: string; stock: string }[] = []
 					btns.forEach((btn) => {
-						const addrEl = btn.querySelector('p.sans-200')
-						const stockEl = btn.querySelector('p.text-bottle-700')
+						const addrEl = btn.querySelector('span.sans-strong-200')
+						const stockEl = btn.querySelector('div.items-center > span')
 						const addr = addrEl?.textContent?.trim().toLowerCase() || ''
 						const stockText = stockEl?.textContent?.trim() || ''
 						const stockMatch = stockText.match(/(\d+)\s*st/i)
@@ -402,20 +402,17 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 		const stores = await page.evaluate(
 			(collectedStocks: Record<string, string>) => {
 				const storeButtons = Array.from(
-					document.querySelectorAll('button.flex.w-full.flex-col')
+					document.querySelectorAll('[role=dialog] button.flex.w-full.flex-col')
 				)
 
 				return storeButtons.map((button) => {
-					const topSection = button.querySelector(
-						'div.flex.w-full.justify-between'
-					)
-					const addressElement = topSection?.querySelector('p.sans-200')
+					const addressElement = button.querySelector('span.sans-strong-200')
 					const address = (
 						addressElement?.textContent?.trim() || ''
 					).toLowerCase()
 
 					let amount = '0'
-					const stockEl = button.querySelector('p.text-bottle-700')
+					const stockEl = button.querySelector('div.items-center > span')
 					const stockText = stockEl?.textContent?.trim() || ''
 					const stockMatch = stockText.match(/(\d+)\s*st/i)
 
@@ -425,7 +422,7 @@ const getDrink = async (url: string, area?: string): Promise<StoreResult> => {
 						amount = collectedStocks[address]
 					}
 
-					const fullAddressElement = button.querySelector('p.text-black65')
+					const fullAddressElement = button.querySelector('span.text-muted-foreground')
 					const fullAddress = (
 						fullAddressElement?.textContent?.trim() || ''
 					).toLowerCase()
