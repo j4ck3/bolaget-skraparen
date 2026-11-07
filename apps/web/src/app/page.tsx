@@ -9,6 +9,7 @@ import PulseStoresLoading from "../components/PulseStoresLoading";
 import StoresGrid from "../components/StoresGrid";
 import AreaInput from "../components/AreaInput";
 import ManageOptions from "../components/MangeOptions";
+import ClosedDays from "../components/ClosedDays";
 import logo from "../../static/bolaget.png";
 
 const Home = () => {
@@ -158,6 +159,8 @@ const Home = () => {
         </div>
         <ManageOptions onClose={handleOnClose} visible={showManageOptions} />
       </div>
+
+      <ClosedDays />
 
       <div className="flex justify-center gap-3 text-xs text-slate-600">
         <a
