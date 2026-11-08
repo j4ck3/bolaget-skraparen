@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Option } from "../interfaces/Option";
-import BackToTopButton from "./BackToTopButton";
 import { type NextPage } from "next";
 import { Store } from "../interfaces/Store";
 import Image from "next/image";
@@ -8,6 +7,7 @@ import Image from "next/image";
 interface Props {
   searchedOption: Option;
   searchedArea: string;
+  compact?: boolean;
   result: {
     price: string;
     stores: Store[];
@@ -18,6 +18,7 @@ const StoresGrid: NextPage<Props> = ({
   searchedOption,
   searchedArea,
   result,
+  compact = false,
 }) => {
   const [showAll, setShowAll] = useState(false);
   const itemsToShow = showAll ? result.stores.length : 4;
@@ -25,8 +26,10 @@ const StoresGrid: NextPage<Props> = ({
   return (
     <>
       {result.stores.length > 0 && (
-        <div className="border border-gray-200 rounded-xl container my-6 mx-auto w-full lg:w-1/3">
-          <div className="flex justify-center items-center m-3">
+        <div className={`border border-gray-200 rounded-xl my-6 w-full ${
+            compact ? "md:w-[30rem] self-start" : "container mx-auto lg:w-1/3"
+          }`}>
+          <div className="flex justify-center items-center m-3 text-center">
             <Image
               alt={searchedOption.title}
               src={searchedOption.imgSrc}
@@ -70,7 +73,6 @@ const StoresGrid: NextPage<Props> = ({
               </button>
             </div>
           )}
-          <BackToTopButton />
         </div>
       )}
     </>

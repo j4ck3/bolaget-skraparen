@@ -10,73 +10,63 @@ import StoresGrid from "../components/StoresGrid";
 import AreaInput from "../components/AreaInput";
 import ManageOptions from "../components/MangeOptions";
 import ClosedDays from "../components/ClosedDays";
+import BackToTopButton from "../components/BackToTopButton";
 import logo from "../../static/bolaget.png";
+
+interface DrinkResult {
+  option: Option;
+  price: string;
+  stores: Store[];
+}
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [area, setArea] = useState<string>("");
   const [searchedArea, setSearchedArea] = useState<string>("");
   const [canSubmit, setCanSubmit] = useState(false);
-  const [result, setResult] = useState<{
-    price: string;
-    stores: Store[];
-  }>({
-    price: "",
-    stores: [],
-  });
+  const [results, setResults] = useState<DrinkResult[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [showManageOptions, setShowManageOptions] = useState(false);
-  const [searchedOption, setSearchedOption] = useState<Option>({
-    imgSrc: "",
-    title: "",
-    url: "",
-  });
-  const [selected, setSelected] = useState<Option>({
-    imgSrc: "",
-    title: "Välj en dryck *",
-    url: "",
-  });
+  const [selected, setSelected] = useState<Option[]>([]);
 
   async function fetchAndLoadStores() {
-    try {
-      setErrorMessage("");
-      setIsLoading(true);
-      setSearchedArea(area);
+    setErrorMessage("");
 
-      if (!selected.url) {
-        setErrorMessage("Välj en dryck");
+    if (selected.length === 0) {
+      setErrorMessage("Välj minst en dryck");
+      return;
+    }
+
+    setIsLoading(true);
+    setSearchedArea(area);
+    setResults([]);
+
+    const settled = await Promise.allSettled(
+      selected.map((option) => getStores(option.url, area))
+    );
+
+    const found: DrinkResult[] = [];
+    const errors: string[] = [];
+    settled.forEach((outcome, i) => {
+      const option = selected[i];
+      if (outcome.status === "rejected") {
+        console.error("Error fetching stores:", outcome.reason);
+        errors.push(`Det gick inte att hämta ${option.title}`);
         return;
       }
-      const res = await getStores(selected.url, area);
-
-      if (res.data.success) {
-        if (res.data.stores.length < 1) {
-          setErrorMessage(`Inga butiker ${area} hade ${selected.title}`);
-          setResult({
-            price: "",
-            stores: [],
-          });
-          return;
-        }
-        setResult(res.data);
-        setSearchedOption(selected);
+      const data = outcome.value?.data;
+      if (!data?.success) {
+        errors.push(`Det gick inte att hämta ${option.title}`);
+      } else if (data.stores.length < 1) {
+        errors.push(`Inga butiker i ${area} hade ${option.title}`);
       } else {
-        setResult({
-          price: "",
-          stores: [],
-        });
-        setErrorMessage("Det gick inte att hämta informationen");
+        found.push({ option, price: data.price, stores: data.stores });
       }
-    } catch (error) {
-      console.error("Error fetching stores:", error);
-      setResult({
-        price: "",
-        stores: [],
-      });
-      setErrorMessage("Det gick inte att hämta informationen");
-    } finally {
-      setIsLoading(false);
-    }
+    });
+
+    setResults(found);
+    if (errors.length > 0) setErrorMessage(errors.join(". "));
+    setIsLoading(false);
   }
 
   const handleStateChange = (newValue: string) => {
@@ -90,7 +80,7 @@ const Home = () => {
     <>
       <Image alt="bolaget" src={logo} width={120} className="m-auto mt-14" />
       <h1 className="text-md mt-8 text-center mx-4 lg:text-2xl">
-        Välj en alkoholhaltig dryck och sedan &#x1F37B;
+        Välj en eller flera drycker och sedan &#x1F37B;
       </h1>
       <h2 className="text-sm md:text-md mt-3 text-center text-gray-500 mx-4">
         ...få detaljerad information om tillgänglighet i butiker nära dig.
@@ -143,12 +133,25 @@ const Home = () => {
           {isLoading ? (
             <PulseStoresLoading />
           ) : (
-            <StoresGrid
-              searchedOption={searchedOption}
-              result={result}
-              searchedArea={searchedArea}
-            />
+            <div
+              className={
+                results.length > 1
+                  ? "flex flex-wrap justify-center gap-x-6"
+                  : undefined
+              }
+            >
+              {results.map((r) => (
+                <StoresGrid
+                  key={r.option.url}
+                  searchedOption={r.option}
+                  result={{ price: r.price, stores: r.stores }}
+                  searchedArea={searchedArea}
+                  compact={results.length > 1}
+                />
+              ))}
+            </div>
           )}
+          {results.length > 0 && <BackToTopButton />}
           <div className="flex justify-center items-center">
             {errorMessage && (
               <p className="text-red-300 bg-red-900 border-red-400 px-12 py-2 border rounded-md">

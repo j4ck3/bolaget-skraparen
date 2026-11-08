@@ -7,9 +7,20 @@ import ey from '../../static/ey.png'
 import tc from '../../static/tc.png'
 
 interface Props {
-	selected: Option
-	setSelected: React.Dispatch<React.SetStateAction<Option>>
+	selected: Option[]
+	setSelected: React.Dispatch<React.SetStateAction<Option[]>>
 }
+
+const DrinkImage = ({ src, className = 'h-12' }: { src: string; className?: string }) =>
+	src !== '' && (src.startsWith('http') || src.startsWith('/')) ? (
+		<Image
+			alt='dricka'
+			src={src}
+			width={20}
+			height={20}
+			className={`inline w-auto ${className}`}
+		/>
+	) : null
 
 const Dropdown: NextPage<Props> = ({ selected, setSelected }) => {
 	const [isActive, setIsActive] = useState(false)
@@ -70,69 +81,78 @@ const Dropdown: NextPage<Props> = ({ selected, setSelected }) => {
 			imgSrc: tc.src
 		}
 	]
-	const combinedOptions = [...options, ...startOptions]
-	const filteredOptions = selected
-		? combinedOptions.filter((option) => option.title !== selected.title)
-		: combinedOptions
+	const combinedOptions = [...options, ...startOptions].filter(
+		(option, index, all) => all.findIndex((o) => o.url === option.url) === index
+	)
+	const isSelected = (option: Option) =>
+		selected.some((s) => s.url === option.url)
+
+	const toggle = (option: Option) =>
+		setSelected((prev) =>
+			prev.some((s) => s.url === option.url)
+				? prev.filter((s) => s.url !== option.url)
+				: [...prev, option]
+		)
 
 	return (
-		<div className='relative z-10'>
+		<div className='relative z-10' ref={dropdownRef}>
 			<div
-				ref={dropdownRef}
-				onClick={toggleDropDown}
-				className={`border bg-black w-full border-radius-2 select-none rounded-md cursor-pointer hover:border-gray-200 overflow-x-auto${
+				className={`border bg-black w-full select-none rounded-md overflow-x-auto ${
 					isActive
 						? 'border-gray-200 absolute md:static'
-						: 'border-gray-400 '
+						: 'border-gray-400 hover:border-gray-200'
 				}`}
 			>
-				<div className='p-4 font-regular hover:bg-slate-600 rounded-md'>
-					<div className='grid grid-cols-6 items-center'>
-						<div className='w-12 flex justify-center col-span-1'>
-							{selected.imgSrc !== '' &&
-								(selected.imgSrc.startsWith('http') ||
-									selected.imgSrc.startsWith('/')) && (
-									<Image
-										alt='dricka'
-										src={selected.imgSrc}
-										width={20}
-										height={20}
-										className='inline w-auto h-12'
-									/>
-								)}
+				<div
+					onClick={toggleDropDown}
+					className='p-4 font-regular hover:bg-slate-600 rounded-md cursor-pointer'
+				>
+					{selected.length === 0 ? (
+						<p className='text-white'>Välj en eller flera drycker *</p>
+					) : (
+						<div className='flex flex-wrap gap-2'>
+							{selected.map((option) => (
+								<span
+									key={option.url}
+									className='flex items-center gap-2 rounded-full border border-gray-500 py-1 ps-2 pe-1 text-sm text-white'
+								>
+									<DrinkImage src={option.imgSrc} className='h-6' />
+									{option.title}
+									<button
+										type='button'
+										aria-label={`Ta bort ${option.title}`}
+										onClick={(e) => {
+											e.stopPropagation()
+											toggle(option)
+										}}
+										className='rounded-full px-2 text-gray-400 hover:bg-slate-500 hover:text-white'
+									>
+										×
+									</button>
+								</span>
+							))}
 						</div>
-						<p className='text-white col-span-5'>{selected.title}</p>
-					</div>
+					)}
 				</div>
 
 				{isActive && (
 					<div>
-						{filteredOptions.map((option, index) => (
+						{combinedOptions.map((option) => (
 							<div
-								key={index}
-								onClick={() => {
-									setSelected(option)
-									setIsActive(false)
-								}}
-								className='font-semibold p-4 hover:bg-slate-600 rounded-md'
+								key={option.url}
+								role='checkbox'
+								aria-checked={isSelected(option)}
+								onClick={() => toggle(option)}
+								className='font-semibold p-4 hover:bg-slate-600 rounded-md cursor-pointer'
 							>
 								<div className='grid grid-cols-6 items-center'>
 									<div className='w-12 flex justify-center col-span-1'>
-										{option.imgSrc !== '' &&
-											(option.imgSrc.startsWith('http') ||
-												option.imgSrc.startsWith('/')) && (
-												<Image
-													alt='dricka'
-													src={option.imgSrc}
-													width={20}
-													height={20}
-													className='inline w-auto h-12'
-												/>
-											)}
+										<DrinkImage src={option.imgSrc} />
 									</div>
-									<p className='text-white col-span-5'>
-										{option.title}
-									</p>
+									<p className='text-white col-span-4'>{option.title}</p>
+									<span className='col-span-1 text-end text-yellow-400'>
+										{isSelected(option) ? '✓' : ''}
+									</span>
 								</div>
 							</div>
 						))}
