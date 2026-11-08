@@ -17,7 +17,9 @@ deploy/            deploy script and notes
 
 The frontend never calls the scraper from the browser. A Next.js server action in `apps/web/src/services/getStoresInfo.ts` calls `GET /api/bolaget/getstores?target=<product url>&area=<city>` on the scraper, using the `API_URL` environment variable.
 
-The scraper opens the product page, opens the "Hitta varan i butik" dialog, filters by city, and reads stock per store. When Systembolaget changes its markup, the selectors in `apps/scraper/src/services/bolagetService.ts` are what break.
+The scraper calls Systembolaget's public JSON API (`api-extern.systembolaget.se/sb-api-ecommerce/v1`), the same one the website uses: it resolves the product number from the URL, lists stores in the city, and fetches stock per store. No browser is involved, so changes to the site's markup do not affect it. The API key is the one the site ships in its client bundle (`NEXT_PUBLIC_API_KEY_APIM`); on a 401 the scraper reads the current key from the site's JS and retries. Set `SYSTEMBOLAGET_API_KEY` to override it.
+
+`.github/workflows/canary.yml` queries the live endpoint every morning and fails if no stores come back, so a breaking change on Systembolaget's side shows up as a failed workflow instead of a user report.
 
 ## Development
 

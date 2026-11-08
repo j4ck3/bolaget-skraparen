@@ -1,0 +1,22 @@
+name: canary
+
+# Daily end-to-end check against the live site. A failed run means
+# Systembolaget changed something the scraper depends on; GitHub emails
+# the repository owner when a scheduled workflow fails.
+
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  getstores:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the live API
+        run: |
+          body=$(curl -fsS -m 60 -G https://bolaget.hjacke.com/api/bolaget/getstores \
+            --data-urlencode 'target=https://www.systembolaget.se/produkt/sprit/absolut-8901/' \
+            --data-urlencode 'area=Uppsala')
+          echo "$body"
+          echo "$body" | jq -e '.data.success == true and (.data.stores | length) > 0'
